@@ -1,0 +1,71 @@
+body {
+  font-family: "Microsoft YaHei", Arial, sans-serif;
+  background: #f7f9fc;
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px;
+}
+
+.container {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 30px;
+  max-width: 600px;
+  width: 100%;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-section {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 150px;
+}
+
+button {
+  background: #0078ff;
+  color: #fff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #005fcc;
+}
+
+.dish-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dish {
+  display: flex;
+  justify-content: space-between;
+  background: #f9f9f9;
+  padding: 10px 14px;
+  border-radius: 8px;
+  align-items: center;
+}
+
+.dish b {
+  font-size: 16px;
+}
