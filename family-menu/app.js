@@ -39,7 +39,13 @@ async function loadDishes() {
   const list = document.getElementById('dish-list');
   const select = document.getElementById('dish-select');
 
-  list.innerHTML = data.map(d => `<li>${d.name} (${d.category}) $${d.price}</li>`).join('');
+  list.innerHTML = data.map(d => `
+    <li>
+      ${d.name} <span class="category-label">${d.category}</span> $${d.price}
+      <button onclick="deleteDish(${d.id})">删除</button>
+    </li>
+  `).join('');
+
   select.innerHTML = data.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
 }
 
@@ -53,22 +59,24 @@ document.getElementById('add-dish-btn').onclick = async () => {
   loadDishes();
 };
 
-// 加载点菜记录
-async function loadOrders() {
-  const { data } = await supabase.from('orders').select(`*, users(username), dishes(name)`).order('created_at', { ascending: false });
-  const list = document.getElementById('order-list');
-  list.innerHTML = data.map(o => `<li>${o.users.username} 点了 ${o.dishes.name} (${o.meal}) 日期: ${o.order_date}</li>`).join('');
+// 删除菜品
+async function deleteDish(id) {
+  if (!confirm('确定删除吗？')) return;
+  await supabase.from('dishes').delete().eq('id', id);
+  loadDishes();
 }
 
-// 点菜
-document.getElementById('order-btn').onclick = async () => {
-  const dishId = document.getElementById('dish-select').value;
-  const meal = document.getElementById('meal-select').value;
-  const order_date = new Date().toISOString().slice(0,10); // YYYY-MM-DD
+// 加载点菜记录
+async function loadOrders() {
+  const { data } = await supabase
+    .from('orders')
+    .select(`*, users(username), dishes(name, category)`)
+    .order('created_at', { ascending: false });
 
-  await supabase.from('orders').insert([{ user_id: currentUser.id, dish_id: dishId, meal, order_date }]);
-  loadOrders();
-};
-
-// 分类筛选
-document.getElementById('category-filter').onchange = loadDishes;
+  const tbody = document.querySelector('#order-table tbody');
+  tbody.innerHTML = data.map(o => `
+    <tr>
+      <td>${o.users.username}</td>
+      <td>${o.dishes.name}</td>
+      <td>${o.dishes.category}</td>
+      <td>${o.meal}<
