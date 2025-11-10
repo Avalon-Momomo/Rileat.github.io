@@ -1,3 +1,3 @@
 # Rileat.github.io
-小莱干饭
+小莱干饭/t
 https://avalon-momomo.github.io/Rileat.github.io/family-menu/index.html
