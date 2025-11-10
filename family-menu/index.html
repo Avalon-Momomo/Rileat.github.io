@@ -1,1 +1,28 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>家庭点菜系统</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>🍽 家庭点菜系统</h1>
+
+    <div class="form-section">
+      <input id="dishName" placeholder="菜名">
+      <input id="dishCategory" placeholder="分类">
+      <input id="dishPrice" placeholder="价格">
+      <button onclick="addDish()">➕ 添加菜品</button>
+    </div>
+
+    <h2>菜单列表</h2>
+    <div id="dishList" class="dish-list"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
 
