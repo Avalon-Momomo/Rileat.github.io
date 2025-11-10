@@ -1,28 +1,52 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>家庭点菜系统</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>家庭菜单</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
 </head>
 <body>
-  <div class="container">
-    <h1>🍽 家庭点菜系统</h1>
+  <h1>🍽 小莱干饭 🍽</h1>
 
-    <div class="form-section">
-      <input id="dishName" placeholder="菜名">
-      <input id="dishCategory" placeholder="分类">
-      <input id="dishPrice" placeholder="价格">
-      <button onclick="addDish()">➕ 添加菜品</button>
-    </div>
+  <!-- 登录 -->
+  <div id="login-container">
+    <input type="text" id="username" placeholder="用户名">
+    <input type="password" id="password" placeholder="密码">
+    <button id="login-btn">登录</button>
+  </div>
 
-    <h2>菜单列表</h2>
-    <div id="dishList" class="dish-list"></div>
+  <!-- 菜单管理 -->
+  <div id="menu-container" style="display:none;">
+    <h2>菜品列表</h2>
+    <select id="category-filter">
+      <option value="">全部分类</option>
+      <option value="素食">素食</option>
+      <option value="肉食">肉食</option>
+      <option value="凉菜">凉菜</option>
+    </select>
+    <ul id="dish-list"></ul>
+
+    <h3>添加/修改菜品</h3>
+    <input type="text" id="dish-name" placeholder="菜名">
+    <input type="text" id="dish-category" placeholder="分类">
+    <input type="number" id="dish-price" placeholder="价格">
+    <button id="add-dish-btn">添加/修改菜品</button>
+
+    <h2>点菜记录</h2>
+    <ul id="order-list"></ul>
+
+    <h3>点菜</h3>
+    <select id="dish-select"></select>
+    <select id="meal-select">
+      <option value="早餐">早餐</option>
+      <option value="午餐">午餐</option>
+      <option value="晚餐">晚餐</option>
+    </select>
+    <button id="order-btn">点菜</button>
   </div>
 
   <script src="app.js"></script>
 </body>
 </html>
-
