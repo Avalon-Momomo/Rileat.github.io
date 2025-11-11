@@ -1,4 +1,88 @@
-/* 日历弹窗样式 */
+body {
+  font-family: "微软雅黑", sans-serif;
+  background-color: #fffaf2;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #ffb347;
+  color: white;
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+main {
+  padding: 20px;
+  max-width: 800px;
+  margin: auto;
+}
+
+.section {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.nav-btn, .bottom-btn a, #saveMenuBtn {
+  display: inline-block;
+  background-color: #ffb347;
+  color: white;
+  padding: 10px 15px;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: 0.2s;
+  cursor: pointer;
+}
+
+.nav-btn:hover, .bottom-btn a:hover, #saveMenuBtn:hover {
+  background-color: #ff9248;
+}
+
+.bottom-btn {
+  text-align: center;
+  margin-top: 30px;
+}
+
+form {
+  display: flex;
+  gap: 10px;
+}
+
+input, button {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+button {
+  background-color: #ffb347;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #ff9248;
+}
+
+#todoList li {
+  background-color: #ffe9d2;
+  padding: 8px;
+  margin-top: 5px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#todoList li:hover {
+  background-color: #ffd08a;
+}
+
+/* 日历弹窗 */
 .modal {
   display: none;
   position: fixed;
@@ -31,36 +115,23 @@
   vertical-align: middle;
   margin-right: 5px;
 }
-#todayMenuList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-#todayMenuList img {
-  width: 80px;
-  height: 80px;
-  border-radius: 10px;
-  object-fit: cover;
-}
 
-#todayMenu {
-  margin-top: 20px;
-  padding: 10px;
-  background: #fffaf0;
-  border-radius: 10px;
-  box-shadow: 0 0 8px rgba(0,0,0,0.1);
-}
-
+/* 今日菜单 */
 #todayMenuList {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
 }
-
 #todayMenuList .menu-item {
   text-align: center;
   background: #fff;
   padding: 8px;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+#todayMenuList img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
 }
