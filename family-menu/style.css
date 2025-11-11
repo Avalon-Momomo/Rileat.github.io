@@ -1,82 +1,44 @@
-body {
-  font-family: "微软雅黑", sans-serif;
-  background-color: #fffaf2;
-  margin: 0;
-  padding: 0;
+/* 日历弹窗样式 */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 999;
+  left: 0; top: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.4);
 }
-
-header {
-  background-color: #ffb347;
-  color: white;
-  text-align: center;
-  padding: 1rem 0;
-  font-size: 1.5rem;
-  font-weight: bold;
-}
-
-main {
+.modal-content {
+  background: white;
   padding: 20px;
-  max-width: 800px;
-  margin: auto;
-}
-
-.section {
-  background: #fff;
+  margin: 15% auto;
   border-radius: 10px;
-  padding: 20px;
-  margin-top: 20px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.nav-btn, .bottom-btn a {
-  display: inline-block;
-  background-color: #ffb347;
-  color: white;
-  padding: 10px 15px;
-  text-decoration: none;
-  border-radius: 6px;
-  transition: 0.2s;
-}
-
-.nav-btn:hover, .bottom-btn a:hover {
-  background-color: #ff9248;
-}
-
-.bottom-btn {
+  width: 80%;
+  max-width: 300px;
   text-align: center;
-  margin-top: 30px;
 }
-
-form {
+.close {
+  float: right;
+  font-size: 20px;
+  cursor: pointer;
+}
+.clickable {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #ff9248;
+}
+.weather-icon {
+  width: 30px;
+  vertical-align: middle;
+  margin-right: 5px;
+}
+#todayMenuList {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
 }
-
-input, button {
-  padding: 8px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-button {
-  background-color: #ffb347;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #ff9248;
-}
-
-#todoList li {
-  background-color: #ffe9d2;
-  padding: 8px;
-  margin-top: 5px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-#todoList li:hover {
-  background-color: #ffd08a;
+#todayMenuList img {
+  width: 80px;
+  height: 80px;
+  border-radius: 10px;
+  object-fit: cover;
 }
