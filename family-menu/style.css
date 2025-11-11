@@ -1,89 +1,86 @@
 body {
-  font-family: "Helvetica Neue", Arial, sans-serif;
-  background-color: #f5f5f5;
+  font-family: "微软雅黑", sans-serif;
+  background-color: #fffaf2;
   margin: 0;
-  padding: 20px;
-  color: #333;
+  padding: 0;
 }
 
-h1, h2, h3 {
-  color: #444;
-  margin-bottom: 10px;
-}
-
-input, select {
-  padding: 8px;
-  margin: 5px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-button {
-  padding: 8px 12px;
-  margin: 5px 0;
-  border: none;
-  border-radius: 5px;
-  background-color: #4caf50;
+header {
+  background-color: #ffb347;
   color: white;
-  cursor: pointer;
-  transition: background-color 0.3s;
+  text-align: center;
+  padding: 1rem 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  letter-spacing: 2px;
 }
 
-button:hover {
-  background-color: #45a049;
-}
-
-#login-container, #menu-container {
-  background-color: #fff;
+main {
   padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
+  max-width: 800px;
+  margin: auto;
+}
+
+.section {
+  background: #fff;
+  border-radius: 10px;
+  padding: 20px;
   margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-#dish-list li {
-  list-style: none;
-  background-color: #eef;
-  padding: 8px 12px;
-  margin-bottom: 5px;
-  border-radius: 5px;
+h2 {
+  color: #333;
+  border-left: 5px solid #ffb347;
+  padding-left: 10px;
+}
+
+.dish-list {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.category-label {
-  font-size: 0.8em;
-  background-color: #d0eaff;
-  padding: 2px 6px;
-  border-radius: 3px;
-  margin-left: 10px;
-}
-
-#order-table {
-  width: 100%;
-  border-collapse: collapse;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 10px;
 }
 
-#order-table th, #order-table td {
-  border: 1px solid #ddd;
+.dish-item {
+  background-color: #ffe9d2;
+  border-radius: 8px;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.dish-item:hover {
+  background-color: #ffd08a;
+}
+
+.dish-item.selected {
+  background-color: #ff9248;
+  color: white;
+  font-weight: bold;
+}
+
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+input, select, button {
   padding: 8px;
-  text-align: left;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
-#order-table th {
-  background-color: #f2f2f2;
+button {
+  background-color: #ffb347;
+  color: white;
+  cursor: pointer;
+  border: none;
+  transition: 0.2s;
 }
 
-@media (max-width: 600px) {
-  input, select, button {
-    width: 100%;
-    margin-bottom: 10px;
-  }
-
-  #login-container, #menu-container {
-    width: 100%;
-    padding: 15px;
-  }
+button:hover {
+  background-color: #ff9248;
 }
