@@ -42,3 +42,25 @@
   border-radius: 10px;
   object-fit: cover;
 }
+
+#todayMenu {
+  margin-top: 20px;
+  padding: 10px;
+  background: #fffaf0;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
+}
+
+#todayMenuList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+#todayMenuList .menu-item {
+  text-align: center;
+  background: #fff;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
