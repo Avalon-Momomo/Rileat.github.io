@@ -1,3 +1,4 @@
+// 本文件主要给 add.html 使用（添加菜谱）
 const form = document.getElementById('addDishForm');
 
 if (form) {
