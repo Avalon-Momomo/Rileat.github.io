@@ -3,70 +3,96 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>小莱干饭</title>
+  <title>家庭首页</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>🍽 小莱干饭 🍽</header>
+  <header>🏡 家庭生活中心</header>
 
   <main>
-    <a class="nav-btn" href="add.html">➕ 添加菜谱</a>
+    <section class="section">
+      <h2>📅 日期与天气</h2>
+      <p id="dateDisplay"></p>
+      <p id="locationDisplay">正在获取位置...</p>
+      <p id="weatherDisplay">加载天气中...</p>
+    </section>
 
     <section class="section">
-      <h2>📋 菜谱列表</h2>
-      <div id="menuContainer"></div>
+      <h2>📝 今日待办</h2>
+      <form id="todoForm">
+        <input type="text" id="todoInput" placeholder="输入待办事项" required>
+        <button type="submit">添加</button>
+      </form>
+      <ul id="todoList"></ul>
     </section>
+
+    <div class="bottom-btn">
+      <a href="menu.html">🍚 小莱干饭</a>
+    </div>
   </main>
 
   <script src="app.js"></script>
   <script>
-    // 读取本地存储的菜谱数据
-    const dishes = JSON.parse(localStorage.getItem('dishes')) || [];
-    const menuContainer = document.getElementById('menuContainer');
+    // ===== 日期显示 =====
+    const dateEl = document.getElementById('dateDisplay');
+    const today = new Date();
+    dateEl.textContent = today.toLocaleDateString('zh-CN', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
 
-    function renderMenu() {
-      menuContainer.innerHTML = '';
-      const grouped = {};
+    // ===== 天气 & 地理位置 =====
+    const locationEl = document.getElementById('locationDisplay');
+    const weatherEl = document.getElementById('weatherDisplay');
 
-      // 分类整理
-      dishes.forEach(d => {
-        if (!grouped[d.mealType]) grouped[d.mealType] = {};
-        if (!grouped[d.mealType][d.dishType]) grouped[d.mealType][d.dishType] = [];
-        grouped[d.mealType][d.dishType].push(d);
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async pos => {
+        const { latitude, longitude } = pos.coords;
+        locationEl.textContent = `📍 坐标：${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const w = data.current_weather;
+        weatherEl.textContent = `🌤 当前温度：${w.temperature}°C，风速 ${w.windspeed} km/h`;
+      }, () => {
+        locationEl.textContent = "⚠️ 无法获取位置信息";
+        weatherEl.textContent = "无法加载天气";
       });
-
-      for (const meal in grouped) {
-        const mealDiv = document.createElement('div');
-        mealDiv.innerHTML = `<h3>🍱 ${meal}</h3>`;
-        for (const type in grouped[meal]) {
-          const typeDiv = document.createElement('div');
-          typeDiv.innerHTML = `<strong>${type}：</strong>`;
-          const dishList = document.createElement('div');
-          dishList.className = 'dish-list';
-
-          grouped[meal][type].forEach(dish => {
-            const item = document.createElement('div');
-            item.className = 'dish-item';
-            item.innerHTML = `
-              <img src="${dish.image}" alt="${dish.name}">
-              <p><strong>${dish.name}</strong></p>
-              <small>${dish.materials}</small>
-              <button class="select-btn">点菜</button>
-            `;
-            item.querySelector('.select-btn').addEventListener('click', () => {
-              item.classList.toggle('selected');
-            });
-            dishList.appendChild(item);
-          });
-
-          typeDiv.appendChild(dishList);
-          mealDiv.appendChild(typeDiv);
-        }
-        menuContainer.appendChild(mealDiv);
-      }
+    } else {
+      locationEl.textContent = "设备不支持定位";
     }
 
-    renderMenu();
+    // ===== 待办事项 =====
+    const todoForm = document.getElementById('todoForm');
+    const todoInput = document.getElementById('todoInput');
+    const todoList = document.getElementById('todoList');
+    const todos = JSON.parse(localStorage.getItem('todos')) || [];
+
+    function renderTodos() {
+      todoList.innerHTML = '';
+      todos.forEach((t, i) => {
+        const li = document.createElement('li');
+        li.textContent = t;
+        li.addEventListener('click', () => {
+          todos.splice(i, 1);
+          localStorage.setItem('todos', JSON.stringify(todos));
+          renderTodos();
+        });
+        todoList.appendChild(li);
+      });
+    }
+
+    todoForm.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = todoInput.value.trim();
+      if (text) {
+        todos.push(text);
+        localStorage.setItem('todos', JSON.stringify(todos));
+        renderTodos();
+        todoInput.value = '';
+      }
+    });
+
+    renderTodos();
   </script>
 </body>
 </html>
