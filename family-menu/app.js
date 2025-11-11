@@ -143,3 +143,24 @@ if (form) {
     else reader.onload();
   });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  // …你首页的天气、日期、日历等初始化逻辑…
+
+  // ✅ 今日菜单汇总
+  const todayMenuList = document.getElementById('todayMenuList');
+  if (todayMenuList) {
+    const selectedDishes = JSON.parse(localStorage.getItem('selectedDishes')) || [];
+    if (selectedDishes.length === 0) {
+      todayMenuList.innerHTML = "<p>还没有点菜喔 🍚</p>";
+    } else {
+      selectedDishes.forEach(d => {
+        const div = document.createElement('div');
+        div.className = 'menu-item';
+        div.innerHTML = `<img src="${d.image}" alt="${d.name}" width="80"><br>${d.name}`;
+        todayMenuList.appendChild(div);
+      });
+    }
+  }
+});
+
