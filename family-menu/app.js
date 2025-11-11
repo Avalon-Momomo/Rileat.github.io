@@ -1,7 +1,7 @@
 const dishes = JSON.parse(localStorage.getItem('dishes')) || [];
 const menuContainer = document.getElementById('menuContainer');
 const saveMenuBtn = document.getElementById('saveMenuBtn');
-let selected = [];
+let selected = JSON.parse(localStorage.getItem('selectedDishes')) || []; // 直接读取已保存的菜
 
 // 当前筛选条件
 let mealFilter = 'all';
@@ -24,6 +24,7 @@ function renderMenu() {
   filtered.forEach(dish => {
     const item = document.createElement('div');
     item.className = 'dish-item';
+    // 已选菜保持高亮
     if (selected.find(x => x.name === dish.name)) item.classList.add('selected');
 
     item.innerHTML = `
@@ -57,7 +58,7 @@ document.querySelectorAll('#mealFilter .filter-btn').forEach(btn => {
     document.querySelectorAll('#mealFilter .filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     mealFilter = btn.dataset.meal;
-    renderMenu();
+    renderMenu(); // 切换分类仍显示已选高亮
   });
 });
 
@@ -66,7 +67,7 @@ document.querySelectorAll('#typeFilter .filter-btn').forEach(btn => {
     document.querySelectorAll('#typeFilter .filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     typeFilter = btn.dataset.type;
-    renderMenu();
+    renderMenu(); // 切换分类仍显示已选高亮
   });
 });
 
@@ -77,4 +78,5 @@ saveMenuBtn.addEventListener('click', () => {
   alert('✅ 今日菜单已保存！可在首页查看~');
 });
 
+// 初始化页面
 renderMenu();
