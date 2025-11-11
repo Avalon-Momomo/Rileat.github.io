@@ -1,17 +1,20 @@
 const dishes = JSON.parse(localStorage.getItem('dishes')) || [];
 const menuContainer = document.getElementById('menuContainer');
 const saveMenuBtn = document.getElementById('saveMenuBtn');
-let selected = JSON.parse(localStorage.getItem('selectedDishes')) || []; // 直接读取已保存的菜
+const selectedSummary = document.getElementById('selectedSummary');
+
+// 已选菜品列表，初始化读取 localStorage
+let selected = JSON.parse(localStorage.getItem('selectedDishes')) || [];
 
 // 当前筛选条件
 let mealFilter = 'all';
 let typeFilter = 'all';
 
-// 渲染菜谱列表
+// ===== 渲染菜谱列表 =====
 function renderMenu() {
   menuContainer.innerHTML = '';
 
-  const filtered = dishes.filter(d => 
+  const filtered = dishes.filter(d =>
     (mealFilter === 'all' || d.mealType === mealFilter) &&
     (typeFilter === 'all' || d.dishType === typeFilter)
   );
@@ -24,7 +27,6 @@ function renderMenu() {
   filtered.forEach(dish => {
     const item = document.createElement('div');
     item.className = 'dish-item';
-    // 已选菜保持高亮
     if (selected.find(x => x.name === dish.name)) item.classList.add('selected');
 
     item.innerHTML = `
@@ -46,9 +48,35 @@ function renderMenu() {
         item.classList.remove('selected');
         btn.textContent = '点菜';
       }
+      renderSelectedSummary();
     });
 
     menuContainer.appendChild(item);
+  });
+}
+
+// ===== 渲染已选菜品汇总 =====
+function renderSelectedSummary() {
+  selectedSummary.innerHTML = '';
+  if (selected.length === 0) {
+    selectedSummary.innerHTML = '<p>还没有选择菜品 🍚</p>';
+    return;
+  }
+
+  selected.forEach((dish, idx) => {
+    const div = document.createElement('div');
+    div.className = 'summary-item';
+    div.innerHTML = `
+      <img src="${dish.image}" alt="${dish.name}">
+      <span>${dish.name}</span>
+      <button class="remove-btn">❌</button>
+    `;
+    div.querySelector('.remove-btn').addEventListener('click', () => {
+      selected.splice(idx, 1);
+      renderMenu();
+      renderSelectedSummary();
+    });
+    selectedSummary.appendChild(div);
   });
 }
 
@@ -58,7 +86,7 @@ document.querySelectorAll('#mealFilter .filter-btn').forEach(btn => {
     document.querySelectorAll('#mealFilter .filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     mealFilter = btn.dataset.meal;
-    renderMenu(); // 切换分类仍显示已选高亮
+    renderMenu();
   });
 });
 
@@ -67,7 +95,7 @@ document.querySelectorAll('#typeFilter .filter-btn').forEach(btn => {
     document.querySelectorAll('#typeFilter .filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     typeFilter = btn.dataset.type;
-    renderMenu(); // 切换分类仍显示已选高亮
+    renderMenu();
   });
 });
 
@@ -78,5 +106,6 @@ saveMenuBtn.addEventListener('click', () => {
   alert('✅ 今日菜单已保存！可在首页查看~');
 });
 
-// 初始化页面
+// 初始化
 renderMenu();
+renderSelectedSummary();
