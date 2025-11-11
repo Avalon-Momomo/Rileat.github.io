@@ -3,69 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>小莱干饭！</title>
+  <title>家庭菜谱点餐</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header>🍽 小莱干饭 🍽</header>
+  <header>🍽 家庭菜谱点餐</header>
 
   <main>
-    <a class="nav-btn" href="add.html">➕ 添加菜谱</a>
-    <a class="nav-btn" href="index.html">🏡 返回首页</a>
+    <!-- 顶部导航按钮 -->
+    <div class="top-nav">
+      <a href="add.html" class="nav-btn">➕ 添加菜谱</a>
+      <a href="index.html" class="nav-btn">🏡 返回首页</a>
+      <button id="saveMenuBtn" class="nav-btn">💾 保存今日菜单</button>
+    </div>
 
+    <!-- 分类1: 餐别 -->
+    <section class="filter-section">
+      <h3>分类1：餐别</h3>
+      <div id="mealFilter">
+        <button class="filter-btn active" data-meal="all">所有</button>
+        <button class="filter-btn" data-meal="早餐">早餐</button>
+        <button class="filter-btn" data-meal="午餐">午餐</button>
+        <button class="filter-btn" data-meal="晚餐">晚餐</button>
+        <button class="filter-btn" data-meal="宵夜">宵夜</button>
+        <button class="filter-btn" data-meal="饮品">饮品</button>
+        <button class="filter-btn" data-meal="零食">零食</button>
+      </div>
+    </section>
+
+    <!-- 分类2: 菜类型 -->
+    <section class="filter-section">
+      <h3>分类2：菜类型</h3>
+      <div id="typeFilter">
+        <button class="filter-btn active" data-type="all">所有</button>
+        <button class="filter-btn" data-type="素菜">素菜</button>
+        <button class="filter-btn" data-type="荤菜">荤菜</button>
+        <button class="filter-btn" data-type="凉菜">凉菜</button>
+      </div>
+    </section>
+
+    <!-- 菜谱展示 -->
     <section class="section">
       <h2>📋 菜谱列表</h2>
       <div id="menuContainer"></div>
     </section>
   </main>
 
-  <script src="app.js"></script>
-  <script>
-    const dishes = JSON.parse(localStorage.getItem('dishes')) || [];
-    const menuContainer = document.getElementById('menuContainer');
-
-    function renderMenu() {
-      menuContainer.innerHTML = '';
-      const grouped = {};
-
-      dishes.forEach(d => {
-        if (!grouped[d.mealType]) grouped[d.mealType] = {};
-        if (!grouped[d.mealType][d.dishType]) grouped[d.mealType][d.dishType] = [];
-        grouped[d.mealType][d.dishType].push(d);
-      });
-
-      for (const meal in grouped) {
-        const mealDiv = document.createElement('div');
-        mealDiv.innerHTML = `<h3>🍱 ${meal}</h3>`;
-        for (const type in grouped[meal]) {
-          const typeDiv = document.createElement('div');
-          typeDiv.innerHTML = `<strong>${type}：</strong>`;
-          const dishList = document.createElement('div');
-          dishList.className = 'dish-list';
-
-          grouped[meal][type].forEach(dish => {
-            const item = document.createElement('div');
-            item.className = 'dish-item';
-            item.innerHTML = `
-              <img src="${dish.image}" alt="${dish.name}">
-              <p><strong>${dish.name}</strong></p>
-              <small>${dish.materials}</small>
-              <button class="select-btn">点菜</button>
-            `;
-            item.querySelector('.select-btn').addEventListener('click', () => {
-              item.classList.toggle('selected');
-            });
-            dishList.appendChild(item);
-          });
-
-          typeDiv.appendChild(dishList);
-          mealDiv.appendChild(typeDiv);
-        }
-        menuContainer.appendChild(mealDiv);
-      }
-    }
-
-    renderMenu();
-  </script>
+  <script src="menu.js"></script>
 </body>
 </html>
