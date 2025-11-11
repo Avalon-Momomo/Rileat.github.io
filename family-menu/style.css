@@ -25,14 +25,46 @@ main {
   background: #fff;
   border-radius: 10px;
   padding: 20px;
-  margin-bottom: 20px;
+  margin-top: 20px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-h2 {
-  color: #333;
-  border-left: 5px solid #ffb347;
-  padding-left: 10px;
+.nav-btn {
+  display: inline-block;
+  background-color: #ffb347;
+  color: white;
+  padding: 10px 15px;
+  text-decoration: none;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+.nav-btn:hover {
+  background-color: #ff9248;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input, select, textarea, button {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+
+button {
+  background-color: #ffb347;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #ff9248;
 }
 
 .dish-list {
@@ -45,42 +77,29 @@ h2 {
 .dish-item {
   background-color: #ffe9d2;
   border-radius: 8px;
-  padding: 10px 15px;
-  cursor: pointer;
+  padding: 10px;
+  width: 160px;
+  text-align: center;
   transition: 0.2s;
 }
 
-.dish-item:hover {
-  background-color: #ffd08a;
+.dish-item img {
+  width: 100%;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 6px;
 }
 
 .dish-item.selected {
   background-color: #ff9248;
   color: white;
-  font-weight: bold;
 }
 
-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-input, select, button {
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-button {
+.select-btn {
+  margin-top: 5px;
   background-color: #ffb347;
-  color: white;
-  cursor: pointer;
   border: none;
-  transition: 0.2s;
-}
-
-button:hover {
-  background-color: #ff9248;
+  padding: 5px 10px;
+  color: white;
+  border-radius: 5px;
 }
