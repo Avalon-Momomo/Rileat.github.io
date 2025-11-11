@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>添加菜谱</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>🍲 添加家庭菜谱</header>
+
+  <main>
+    <a class="nav-btn" href="index.html">⬅ 返回点餐页</a>
+
+    <section class="section">
+      <form id="addDishForm">
+        <label>菜名：</label>
+        <input type="text" id="dishName" required>
+
+        <label>餐别：</label>
+        <select id="mealType">
+          <option value="早餐">早餐</option>
+          <option value="午餐">午餐</option>
+          <option value="晚餐">晚餐</option>
+        </select>
+
+        <label>菜类型：</label>
+        <select id="dishType">
+          <option value="荤菜">荤菜</option>
+          <option value="素菜">素菜</option>
+          <option value="凉菜">凉菜</option>
+        </select>
+
+        <label>材料：</label>
+        <textarea id="materials" placeholder="请输入主要食材" rows="3"></textarea>
+
+        <label>做法：</label>
+        <textarea id="steps" placeholder="请输入简单做法" rows="4"></textarea>
+
+        <label>上传图片：</label>
+        <input type="file" id="dishImage" accept="image/*">
+
+        <button type="submit">保存菜谱</button>
+      </form>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
