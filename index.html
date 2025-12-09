@@ -1,234 +1,86 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>实时天气首页</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>3D 实时天气（Three.js）</title>
 <style>
-  * { margin: 0; padding: 0; }
-
-  body {
-    height: 100vh;
-    background-size: cover;
-    background-position: center;
-    overflow: hidden;
-    font-family: Arial, sans-serif;
-    color: white;
-    text-shadow: 0 0 8px black;
-    transition: background 1s ease-in-out;
+  html,body{height:100%;margin:0;background:#000;overflow:hidden;font-family:Inter,Arial,sans-serif}
+  #ui {
+    position: absolute; z-index: 10; left: 16px; top: 16px;
+    color: #fff; backdrop-filter: blur(6px); background: rgba(0,0,0,0.25);
+    padding: 12px; border-radius: 10px; min-width: 320px;
   }
-
-  .container {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-    background: rgba(0,0,0,0.3);
-    padding: 25px 40px;
-    border-radius: 20px;
-    backdrop-filter: blur(3px);
-  }
-
-  input {
-    padding: 8px 12px;
-    margin-top: 10px;
-    width: 200px;
-    border-radius: 8px;
-    border: none;
-  }
-
-  #rain, #snow {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-  }
+  #ui input { width: 180px; padding: 8px; border-radius: 6px; border: none; margin-right:6px; background: rgba(255,255,255,0.06); color:#fff }
+  #ui button { padding: 8px 10px; border-radius:6px; border:none; cursor:pointer; background: rgba(255,255,255,0.06); color:#fff }
+  #info { margin-top:8px; font-size:13px; color:#ddd }
+  #credits { position: absolute; z-index: 10; right: 14px; bottom: 14px; color: rgba(255,255,255,0.7); font-size:12px; }
+  .small { font-size:12px; color:#cfcfcf }
+  @media (max-width:520px){ #ui{left:8px;right:8px;min-width:auto;width:calc(100% - 16px)} }
 </style>
 </head>
-
 <body>
-
-<div class="container">
-  <h1 id="city">加载中...</h1>
-  <h2 id="temp"></h2>
-  <h3 id="condition"></h3>
-
-  <input id="cityInput" placeholder="输入城市（Sydney）">
-  <button onclick="loadWeather()">查询</button>
+<div id="ui">
+  <div style="display:flex;align-items:center;gap:6px;">
+    <input id="q" placeholder="城市名或 lat,lon (例如：Adelaide 或 -34.92,138.60)">
+    <button id="search">查询</button>
+    <button id="loc">定位</button>
+  </div>
+  <div id="info">
+    <div id="place">加载中…</div>
+    <div id="weatherText" class="small">—</div>
+    <div id="temp" class="small">—</div>
+  </div>
 </div>
+<div id="credits">数据：WeatherAPI · 渲染：Three.js</div>
 
-<canvas id="rain"></canvas>
-<canvas id="snow"></canvas>
+<!-- Three.js (r152 or latest) -->
+<script src="https://unpkg.com/three@0.152.2/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.152.2/examples/js/controls/OrbitControls.js"></script>
 
 <script>
-// =============== CONFIG ================
-const API_KEY = "0871934c91a1479984b40316250912";
+/* ================= CONFIG ================= */
+const API_KEY = "0871934c91a1479984b40316250912"; // ← 如需替换在这里改
+const DEFAULT_PLACE = "Adelaide";
+/* =============== END CONFIG =============== */
 
-// ============ 主函数 ===============
-async function loadWeather(auto = false) {
-  let city = document.getElementById("cityInput").value || "Sydney";
+/* ============ 基础 Three.js 场景 ============ */
+let scene, camera, renderer, clock;
+let rainSystem, snowSystem, cloudGroup, sunLight, hemiLight, groundMesh, starSystem;
+let isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-  if (auto === true) city = "Sydney";
+initThree();
+animate();
 
-  const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${city}&lang=zh`;
+/* ============ 初始化 Three 场景 ============ */
+function initThree(){
+  const container = document.body;
+  scene = new THREE.Scene();
+  clock = new THREE.Clock();
 
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
+  camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 2000);
+  camera.position.set(0, 10, 30);
 
-    document.getElementById("city").innerText = data.location.name;
-    document.getElementById("temp").innerText = data.current.temp_c + "°C";
-    document.getElementById("condition").innerText = data.current.condition.text;
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.shadowMap.enabled = true;
+  container.appendChild(renderer.domElement);
 
-    setBackground(data);
-  } catch (e) {
-    alert("无法获取天气，请检查城市名");
-  }
-}
+  // lights
+  hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
+  hemiLight.position.set(0, 50, 0);
+  scene.add(hemiLight);
 
+  sunLight = new THREE.DirectionalLight(0xffffff, 0.9);
+  sunLight.castShadow = true;
+  sunLight.shadow.camera.left = -50;
+  sunLight.shadow.camera.right = 50;
+  sunLight.shadow.camera.top = 50;
+  sunLight.shadow.camera.bottom = -50;
+  sunLight.shadow.mapSize.set(1024,1024);
+  sunLight.position.set(30, 60, 20);
+  scene.add(sunLight);
 
-// =========== 设置真实天气背景 ===========
-function setBackground(data) {
-  const condition = data.current.condition.text;
-  const isNight = data.current.is_day === 0;
-
-  let bg = "";
-
-  if (condition.includes("雨")) {
-    bg = isNight ? "url('https://i.imgur.com/YGNxIIV.jpeg')" :
-                   "url('https://i.imgur.com/k4cTPmF.jpeg')";
-    startRain();
-  } 
-  else if (condition.includes("雪")) {
-    bg = "url('https://i.imgur.com/PHhG3h4.jpeg')";
-    startSnow();
-  }
-  else if (condition.includes("云") || condition.includes("阴")) {
-    bg = isNight ? "url('https://i.imgur.com/Ph3aFiT.jpeg')" :
-                   "url('https://i.imgur.com/PXSWjfe.jpeg')";
-    stopEffects();
-  }
-  else {
-    // 晴天
-    bg = isNight ? "url('https://i.imgur.com/Ph3aFiT.jpeg')" :
-                   "url('https://i.imgur.com/2v9C0up.jpeg')";
-    stopEffects();
-  }
-
-  document.body.style.backgroundImage = bg;
-}
-
-
-// =============== 雨效果 ===============
-let rainRunning = false;
-function startRain() {
-  stopSnow();
-  if (rainRunning) return;
-
-  const canvas = document.getElementById("rain");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  let drops = [];
-  for (let i = 0; i < 300; i++) {
-    drops.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      len: Math.random() * 20 + 10,
-      speed: Math.random() * 4 + 4
-    });
-  }
-
-  rainRunning = true;
-
-  function rain() {
-    if (!rainRunning) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "rgba(255,255,255,0.4)";
-    ctx.lineWidth = 1;
-
-    drops.forEach(d => {
-      ctx.beginPath();
-      ctx.moveTo(d.x, d.y);
-      ctx.lineTo(d.x, d.y + d.len);
-      ctx.stroke();
-
-      d.y += d.speed;
-      if (d.y > canvas.height) d.y = -20;
-    });
-
-    requestAnimationFrame(rain);
-  }
-
-  rain();
-}
-
-function stopRain() {
-  rainRunning = false;
-}
-
-
-// =============== 雪效果 ===============
-let snowRunning = false;
-
-function startSnow() {
-  stopRain();
-  if (snowRunning) return;
-
-  const canvas = document.getElementById("snow");
-  const ctx = canvas.getContext("2d");
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-
-  let flakes = [];
-  for (let i = 0; i < 200; i++) {
-    flakes.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      r: Math.random() * 3 + 1,
-      speed: Math.random() * 1 + 0.5
-    });
-  }
-
-  snowRunning = true;
-
-  function snow() {
-    if (!snowRunning) return;
-
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "white";
-
-    flakes.forEach(f => {
-      ctx.beginPath();
-      ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
-      ctx.fill();
-
-      f.y += f.speed;
-      if (f.y > canvas.height) f.y = -5;
-    });
-
-    requestAnimationFrame(snow);
-  }
-
-  snow();
-}
-
-function stopSnow() {
-  snowRunning = false;
-}
-
-
-// 停止所有天气效果
-function stopEffects() {
-  stopRain();
-  stopSnow();
-}
-
-
-// ============= 自动加载天气 ==============
-loadWeather(true);
-</script>
-</body>
-</html>
+  // ground (reflective-ish plane)
+  const groundGeo = new THREE.PlaneG
