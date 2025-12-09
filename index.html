@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <title>天气 · Apple 风动态版</title>
+  <title>天气 · Apple 风精简版</title>
   <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
   <style>
@@ -37,7 +37,7 @@
       width: 100%;
       max-width: 420px;           /* 中间一小块卡片 */
       margin: 72px auto;          /* 上下留白，居中 */
-      padding: 22px 20px 24px;
+      padding: 22px 20px 20px;
       border-radius: 32px;
       background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
       backdrop-filter: blur(22px) saturate(1.2);
@@ -186,42 +186,6 @@
       opacity: 0.9;
     }
 
-    .section-title {
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-      opacity: 0.9;
-      margin-bottom: 6px;
-      padding-left: 2px;
-    }
-
-    .today-grid {
-      display: grid;
-      grid-template-columns: repeat(3,minmax(0,1fr));
-      gap: 10px;
-    }
-
-    .card-small {
-      padding: 10px 12px;
-      border-radius: 16px;
-      background: rgba(0,0,0,0.16);
-      border: 1px solid rgba(255,255,255,0.18);
-      font-size: 13px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .card-small-label {
-      opacity: 0.8;
-    }
-
-    .card-small-value {
-      font-size: 16px;
-      font-weight: 500;
-    }
-
     footer {
       margin-top: 4px;
       font-size: 11px;
@@ -246,7 +210,7 @@
         max-width: none;
         width: calc(100% - 24px);  /* 稍微贴边一点，像 App */
         margin: 12px auto 16px;
-        padding: 18px 16px 20px;
+        padding: 18px 16px 18px;
         border-radius: 26px;
         gap: 16px;
       }
@@ -297,16 +261,6 @@
         height: 56px;
       }
 
-      .today-grid {
-        grid-template-columns: repeat(2,minmax(0,1fr));
-        gap: 8px;
-      }
-
-      .card-small {
-        padding: 9px 10px;
-        border-radius: 14px;
-      }
-
       footer {
         flex-direction: column;
         align-items: flex-start;
@@ -344,36 +298,6 @@
       <div class="right-now">
         <div id="iconWrapper" class="now-icon"></div>
         <div class="feels" id="feelsLike">体感：--°</div>
-      </div>
-    </section>
-
-    <section>
-      <div class="section-title">今日详情</div>
-      <div class="today-grid">
-        <div class="card-small">
-          <div class="card-small-label">风速</div>
-          <div class="card-small-value" id="wind">-- km/h</div>
-        </div>
-        <div class="card-small">
-          <div class="card-small-label">湿度</div>
-          <div class="card-small-value" id="humidity">--%</div>
-        </div>
-        <div class="card-small">
-          <div class="card-small-label">紫外线指数</div>
-          <div class="card-small-value" id="uv">--</div>
-        </div>
-        <div class="card-small">
-          <div class="card-small-label">气压</div>
-          <div class="card-small-value" id="pressure">-- hPa</div>
-        </div>
-        <div class="card-small">
-          <div class="card-small-label">能见度</div>
-          <div class="card-small-value" id="visibility">-- km</div>
-        </div>
-        <div class="card-small">
-          <div class="card-small-label">云量</div>
-          <div class="card-small-value" id="cloud">--%</div>
-        </div>
       </div>
     </section>
   </main>
@@ -558,7 +482,7 @@
   }
 
   function drawGroundGlow() {
-    // 底部环境光晕，让光照更「糯」
+    // 底部环境光晕，让光照更柔和
     var gx = canvas.width * 0.5;
     var gy = canvas.height * 0.9;
     var grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, canvas.height * 0.7);
@@ -775,10 +699,8 @@
   function setWeatherIcon() {
     var svg = "";
 
-    // 根据 weatherMode + timeOfDay 选一个大致对应的 SF Weather 风格图标
     if (weatherMode === "sun") {
       if (timeOfDay === "dawn" || timeOfDay === "evening") {
-        // 太阳带一点云
         svg = sunCloudSvg();
       } else {
         svg = sunSvg();
@@ -808,7 +730,6 @@
     iconWrapper.innerHTML = svg;
   }
 
-  // 一系列简化版 SF Weather 风格图标
   function sunSvg() {
     return (
       '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
@@ -945,12 +866,6 @@
   var condEl     = document.getElementById("condition");
   var hiLoEl     = document.getElementById("hiLo");
   var feelsEl    = document.getElementById("feelsLike");
-  var windEl     = document.getElementById("wind");
-  var humidityEl = document.getElementById("humidity");
-  var uvEl       = document.getElementById("uv");
-  var pressureEl = document.getElementById("pressure");
-  var visEl      = document.getElementById("visibility");
-  var cloudEl    = document.getElementById("cloud");
   var updatedEl  = document.getElementById("updated");
 
   var searchInput = document.getElementById("search");
@@ -1006,20 +921,12 @@
     var lo = Math.round(c.temp_c - 2);
     hiLoEl.textContent = "最高 " + hi + "° · 最低 " + lo + "°";
 
-    feelsEl.textContent    = "体感：" + Math.round(c.feelslike_c) + "°";
-    windEl.textContent     = c.wind_kph + " km/h";
-    humidityEl.textContent = c.humidity + "%";
-    uvEl.textContent       = c.uv;
-    pressureEl.textContent = c.pressure_mb ? (c.pressure_mb + " hPa") : "—";
-    visEl.textContent      = (c.vis_km !== undefined) ? (c.vis_km + " km") : "—";
-    cloudEl.textContent    = (c.cloud !== undefined) ? (c.cloud + "%") : "—";
+    feelsEl.textContent = "体感：" + Math.round(c.feelslike_c) + "°";
 
     var now = new Date();
     updatedEl.textContent = "上次更新：" + now.toLocaleTimeString();
 
-    // 先更新背景模式
     setWeatherVisual(c.condition.text, loc.localtime, c.is_day === 1);
-    // 再更新 Apple 风格图标
     setWeatherIcon();
   }
 
