@@ -39,7 +39,7 @@
       margin: 72px auto;          /* 上下留白，居中 */
       padding: 22px 20px 24px;
       border-radius: 32px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05));
+      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
       backdrop-filter: blur(22px) saturate(1.2);
       -webkit-backdrop-filter: blur(22px) saturate(1.2);
       border: 1px solid rgba(255,255,255,0.18);
@@ -51,10 +51,11 @@
       gap: 18px;
     }
 
+    /* 顶部：城市 + 搜索框（都在卡片内） */
     header.top {
-      display: flex;
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
       align-items: center;
-      justify-content: space-between;
       gap: 12px;
     }
 
@@ -75,9 +76,16 @@
     }
 
     .search-box {
+      justify-self: end;
       display: flex;
       gap: 8px;
       align-items: center;
+      position: relative;
+      transition: transform .15s ease;
+    }
+
+    .search-box:focus-within {
+      transform: translateY(-1px);
     }
 
     .search-box input {
@@ -88,7 +96,20 @@
       font-size: 14px;
       background: rgba(255,255,255,0.18);
       color: #fff;
-      min-width: 150px;
+      width: 170px;
+      transition: background .18s ease, box-shadow .18s ease, transform .12s ease;
+    }
+
+    .search-box input::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
+
+    .search-box input:focus {
+      background: rgba(255,255,255,0.26);
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.9),
+        0 0 18px rgba(0,0,0,0.7);
+      transform: translateY(-1px);
     }
 
     .search-box button {
@@ -150,6 +171,14 @@
       width: 60px;
       height: 60px;
       filter: drop-shadow(0 4px 10px rgba(0,0,0,0.5));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .now-icon svg {
+      width: 100%;
+      height: 100%;
     }
 
     .feels {
@@ -223,27 +252,15 @@
       }
 
       header.top {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 10px;
-      }
-
-      .city-block {
-        align-items: flex-start;
-      }
-
-      .city {
-        font-size: 24px;
-      }
-
-      .time {
-        font-size: 12px;
+        grid-template-columns: 1fr;
+        row-gap: 10px;
       }
 
       .search-box {
+        justify-self: stretch;
         flex-direction: column;
+        width: 100%;
         align-items: stretch;
-        gap: 6px;
       }
 
       .search-box input {
@@ -325,7 +342,7 @@
       </div>
 
       <div class="right-now">
-        <img id="icon" class="now-icon" src="" alt="">
+        <div id="iconWrapper" class="now-icon"></div>
         <div class="feels" id="feelsLike">体感：--°</div>
       </div>
     </section>
@@ -522,9 +539,10 @@
     }
     var hex = c.replace("#", "");
     if (hex.length === 3) {
-      hex = hex.charAt(0) + hex.charAt(0) +
-            hex.charAt(1) + hex.charAt(1) +
-            hex.charAt(2) + hex.charAt(2);
+      hex =
+        hex.charAt(0) + hex.charAt(0) +
+        hex.charAt(1) + hex.charAt(1) +
+        hex.charAt(2) + hex.charAt(2);
     }
     var num = parseInt(hex, 16);
     return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
@@ -539,6 +557,31 @@
     return "rgb(" + r + "," + g + "," + b2 + ")";
   }
 
+  function drawGroundGlow() {
+    // 底部环境光晕，让光照更「糯」
+    var gx = canvas.width * 0.5;
+    var gy = canvas.height * 0.9;
+    var grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, canvas.height * 0.7);
+
+    var color;
+    if (weatherMode === "sun") {
+      color = "rgba(255,255,255,0.18)";
+    } else if (weatherMode === "rain" || weatherMode === "storm") {
+      color = "rgba(200,220,255,0.12)";
+    } else if (weatherMode === "snow") {
+      color = "rgba(255,255,255,0.22)";
+    } else if (weatherMode === "night") {
+      color = "rgba(120,160,255,0.12)";
+    } else { // cloud
+      color = "rgba(230,235,245,0.14)";
+    }
+
+    grad.addColorStop(0, color);
+    grad.addColorStop(1, "rgba(0,0,0,0)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
   var lastTime = 0;
   function animate(t) {
     requestAnimationFrame(animate);
@@ -546,7 +589,8 @@
     if (!dt) dt = 1;
     lastTime = t;
 
-    var lerp = 0.03;
+    // 天空颜色缓动更丝滑
+    var lerp = 0.02;
     currentSky.top = lerpColor(currentSky.top, targetSky.top, lerp);
     currentSky.bottom = lerpColor(currentSky.bottom, targetSky.bottom, lerp);
 
@@ -556,6 +600,10 @@
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // 环境光晕
+    drawGroundGlow();
+
+    // 星星（夜晚）
     if (weatherMode === "night") {
       for (var i = 0; i < stars.length; i++) {
         var s = stars[i];
@@ -569,13 +617,15 @@
       }
     }
 
+    // 太阳 / 月亮
     if (weatherMode !== "night") {
       drawSunOrMoon("sun");
     } else {
       drawSunOrMoon("moon");
     }
 
-    if (["sun","cloud","rain","storm","snow"].indexOf(weatherMode) !== -1) {
+    // 云层
+    if (["sun", "cloud", "rain", "storm", "snow"].indexOf(weatherMode) !== -1) {
       for (var j = 0; j < backgroundClouds.length; j++) {
         var cb = backgroundClouds[j];
         cb.x += cb.speed * dt;
@@ -591,6 +641,7 @@
       }
     }
 
+    // 雨
     if (weatherMode === "rain" || weatherMode === "storm") {
       ctx.strokeStyle = "rgba(255,255,255,0.45)";
       ctx.lineWidth = 1.2;
@@ -610,12 +661,14 @@
         }
       }
 
+      // 闪电
       if (weatherMode === "storm" && Math.random() < 0.004) {
         ctx.fillStyle = "rgba(255,255,255,0.2)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
     }
 
+    // 雪
     if (weatherMode === "snow") {
       ctx.fillStyle = "rgba(255,255,255,0.96)";
       for (var n = 0; n < snowFlakes.length; n++) {
@@ -668,18 +721,21 @@
       windX = 2.5;
       createRain(1.3);
       createCloudLayer();
+      stars = [];
     } else if (/rain|drizzle|阵雨|雨/.test(text)) {
       weatherMode = "rain";
       targetSky = skyPresets.rain;
       windX = 1.5;
       createRain(1.0);
       createCloudLayer();
+      stars = [];
     } else if (/snow|sleet|雪/.test(text)) {
       weatherMode = "snow";
       targetSky = skyPresets.snow;
       windX = 0.3;
       createSnow(1.0);
       createCloudLayer();
+      stars = [];
     } else if (/cloud|overcast|多云|阴/.test(text)) {
       weatherMode = "cloud";
       targetSky = skyPresets.cloud;
@@ -713,6 +769,172 @@
     }
   }
 
+  /* ================== Apple SF 风格天气图标（SVG） ================== */
+  var iconWrapper = document.getElementById("iconWrapper");
+
+  function setWeatherIcon() {
+    var svg = "";
+
+    // 根据 weatherMode + timeOfDay 选一个大致对应的 SF Weather 风格图标
+    if (weatherMode === "sun") {
+      if (timeOfDay === "dawn" || timeOfDay === "evening") {
+        // 太阳带一点云
+        svg = sunCloudSvg();
+      } else {
+        svg = sunSvg();
+      }
+    } else if (weatherMode === "cloud") {
+      if (timeOfDay === "night") {
+        svg = moonCloudSvg();
+      } else {
+        svg = cloudSvg();
+      }
+    } else if (weatherMode === "rain") {
+      if (timeOfDay === "night") {
+        svg = moonRainSvg();
+      } else {
+        svg = cloudRainSvg();
+      }
+    } else if (weatherMode === "storm") {
+      svg = cloudBoltRainSvg();
+    } else if (weatherMode === "snow") {
+      svg = cloudSnowSvg();
+    } else if (weatherMode === "night") {
+      svg = moonStarsSvg();
+    } else {
+      svg = sunSvg();
+    }
+
+    iconWrapper.innerHTML = svg;
+  }
+
+  // 一系列简化版 SF Weather 风格图标
+  function sunSvg() {
+    return (
+      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs>' +
+          '<radialGradient id="sunCore" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(32 32) rotate(90) scale(18 18)">' +
+            '<stop stop-color="#FFF9D4"/>' +
+            '<stop offset="1" stop-color="#FFE58F"/>' +
+          '</radialGradient>' +
+        '</defs>' +
+        '<circle cx="32" cy="32" r="18" fill="url(#sunCore)"/>' +
+        '<g stroke="#FFE9A9" stroke-width="3" stroke-linecap="round" opacity="0.9">' +
+          '<line x1="32" y1="8"  x2="32" y2="2"/>' +
+          '<line x1="32" y1="62" x2="32" y2="56"/>' +
+          '<line x1="8"  y1="32" x2="2"  y2="32"/>' +
+          '<line x1="62" y1="32" x2="56" y2="32"/>' +
+          '<line x1="13" y1="13" x2="8"  y2="8"/>' +
+          '<line x1="51" y1="51" x2="56" y2="56"/>' +
+          '<line x1="13" y1="51" x2="8"  y2="56"/>' +
+          '<line x1="51" y1="13" x2="56" y2="8"/>' +
+        '</g>' +
+      '</svg>'
+    );
+  }
+
+  function sunCloudSvg() {
+    return (
+      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<defs>' +
+          '<radialGradient id="sunCore2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(22 20) rotate(90) scale(12 12)">' +
+            '<stop stop-color="#FFF9D4"/>' +
+            '<stop offset="1" stop-color="#FFE58F"/>' +
+          '</radialGradient>' +
+        '</defs>' +
+        '<circle cx="22" cy="20" r="12" fill="url(#sunCore2)" opacity="0.95"/>' +
+        '<path d="M21 40c0-5.5 4.5-10 10-10 4.1 0 7.7 2.4 9.2 6 3.5-.2 6.8 2.4 7.1 6 0 0.2 0 .4 0 .6-0.2 4-3.5 7.1-7.6 7.1H27c-5.2 0-9.3-4.2-9.3-9.3 0-3 1.4-5.7 3.8-7.4C21.1 35.3 21 37.6 21 40Z" fill="white" fill-opacity="0.96"/>' +
+      '</svg>'
+    );
+  }
+
+  function cloudSvg() {
+    return (
+      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M23 28c1.3-6 6.6-10.5 13-10.5 7.2 0 13 5.8 13 13 4 0.4 7 3.9 7 8 0 4.4-3.6 8-8 8H23c-5.5 0-10-4.5-10-10 0-5 3.7-9.1 8.4-9.9C21.9 26 22.4 27 23 28Z" fill="white" fill-opacity="0.96"/>' +
+      '</svg>'
+    );
+  }
+
+  function moonSvgBase() {
+    return (
+      '<path d="M41 14c-2 8.5-1.3 14.9 2.1 20.3C47 40 52.5 44 59 46.5 56.2 50.3 51.6 52.7 46.5 52.7 36.6 52.7 28.5 44.6 28.5 34.7 28.5 25.7 34.1 18.3 41 14Z" fill="rgba(236,241,255,0.95)"/>'
+    );
+  }
+
+  function moonCloudSvg() {
+    return (
+      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        moonSvgBase() +
+        '<path d="M20 36c1.3-5.5 6-9.5 11.7-9.5 6.6 0 12 5.1 12.3 11.7 3.5 0.1 6.3 3 6.3 6.5 0 3.6-2.9 6.5-6.5 6.5H24c-4.9 0-9-4-9-9 0-4.4 3.1-8.1 7-8.9Z" fill="white" fill-opacity="0.96"/>' +
+      '</svg>'
+    );
+  }
+
+  function moonStarsSvg() {
+    return (
+      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        moonSvgBase() +
+        '<circle cx="18" cy="16" r="2" fill="#FFE9A9"/>' +
+        '<circle cx="14" cy="24" r="1.6" fill="#FFE9A9"/>' +
+        '<circle cx="24" cy="20" r="1.8" fill="#FFE9A9"/>' +
+      '</svg>'
+    );
+  }
+
+  function moonRainSvg() {
+    return (
+      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        moonSvgBase() +
+        '<path d="M22 35c1.3-5.2 5.9-9.1 11.4-9.1 6.4 0 11.6 5.1 11.6 11.6 3.4 0.1 6.1 2.9 6.1 6.4 0 3.5-2.8 6.4-6.4 6.4H26.3C21.5 50.3 18 46 18 41.5c0-3.9 2.7-7.2 6.1-8.1Z" fill="white" fill-opacity="0.96"/>' +
+        '<g stroke="#B9D8FF" stroke-width="2.3" stroke-linecap="round">' +
+          '<line x1="26" y1="52" x2="24" y2="58"/>' +
+          '<line x1="34" y1="52" x2="32" y2="58"/>' +
+          '<line x1="42" y1="52" x2="40" y2="58"/>' +
+        '</g>' +
+      '</svg>'
+    );
+  }
+
+  function cloudRainSvg() {
+    return (
+      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M23 26c1.4-6 6.7-10.3 13-10.3 7.3 0 13.2 5.9 13.2 13.2 3.9 0.4 6.9 3.7 6.9 7.7 0 4.3-3.5 7.9-7.9 7.9H24c-5.6 0-10.2-4.6-10.2-10.2 0-5 3.6-9.1 8.3-9.9 0.3-1.1 0.6-1.9 0.9-2.4Z" fill="white" fill-opacity="0.96"/>' +
+        '<g stroke="#B9D8FF" stroke-width="2.3" stroke-linecap="round">' +
+          '<line x1="24" y1="48" x2="22" y2="54"/>' +
+          '<line x1="32" y1="48" x2="30" y2="54"/>' +
+          '<line x1="40" y1="48" x2="38" y2="54"/>' +
+          '<line x1="48" y1="48" x2="46" y2="54"/>' +
+        '</g>' +
+      '</svg>'
+    );
+  }
+
+  function cloudBoltRainSvg() {
+    return (
+      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M23 26c1.4-6 6.7-10.3 13-10.3 7.3 0 13.2 5.9 13.2 13.2 3.9 0.4 6.9 3.7 6.9 7.7 0 4.3-3.5 7.9-7.9 7.9H24c-5.6 0-10.2-4.6-10.2-10.2 0-5 3.6-9.1 8.3-9.9 0.3-1.1 0.6-1.9 0.9-2.4Z" fill="white" fill-opacity="0.96"/>' +
+        '<path d="M30 50l4-8h-4l4-8" stroke="#FFD36B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '<g stroke="#B9D8FF" stroke-width="2.3" stroke-linecap="round">' +
+          '<line x1="44" y1="48" x2="42" y2="54"/>' +
+        '</g>' +
+      '</svg>'
+    );
+  }
+
+  function cloudSnowSvg() {
+    return (
+      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M23 26c1.4-6 6.7-10.3 13-10.3 7.3 0 13.2 5.9 13.2 13.2 3.9 0.4 6.9 3.7 6.9 7.7 0 4.3-3.5 7.9-7.9 7.9H24c-5.6 0-10.2-4.6-10.2-10.2 0-5 3.6-9.1 8.3-9.9 0.3-1.1 0.6-1.9 0.9-2.4Z" fill="white" fill-opacity="0.96"/>' +
+        '<g fill="#E5F2FF">' +
+          '<circle cx="26" cy="50" r="2"/>' +
+          '<circle cx="34" cy="52" r="2"/>' +
+          '<circle cx="42" cy="50" r="2"/>' +
+        '</g>' +
+      '</svg>'
+    );
+  }
+
   /* ================== WeatherAPI + UI ================== */
 
   var API_KEY = "0871934c91a1479984b40316250912";
@@ -722,7 +944,6 @@
   var tempEl     = document.getElementById("temp");
   var condEl     = document.getElementById("condition");
   var hiLoEl     = document.getElementById("hiLo");
-  var iconEl     = document.getElementById("icon");
   var feelsEl    = document.getElementById("feelsLike");
   var windEl     = document.getElementById("wind");
   var humidityEl = document.getElementById("humidity");
@@ -780,8 +1001,6 @@
     timeEl.textContent = "当地时间：" + loc.localtime;
     tempEl.textContent = Math.round(c.temp_c) + "°";
     condEl.textContent = c.condition.text;
-    iconEl.src = "https:" + c.condition.icon;
-    iconEl.alt = c.condition.text;
 
     var hi = Math.round(c.temp_c + 2);
     var lo = Math.round(c.temp_c - 2);
@@ -798,7 +1017,10 @@
     var now = new Date();
     updatedEl.textContent = "上次更新：" + now.toLocaleTimeString();
 
+    // 先更新背景模式
     setWeatherVisual(c.condition.text, loc.localtime, c.is_day === 1);
+    // 再更新 Apple 风格图标
+    setWeatherIcon();
   }
 
   function autoLocate() {
@@ -818,6 +1040,7 @@
     );
   }
 
+  // 初始加载
   autoLocate();
 </script>
 
