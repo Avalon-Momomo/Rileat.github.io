@@ -5,70 +5,71 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>实时天气首页</title>
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
-            background-size: cover;
-            background-position: center;
-            font-family: "Arial", sans-serif;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-shadow: 0 2px 10px rgba(0,0,0,0.7);
-            transition: background-image 1s ease-in-out;
-        }
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.7);
+    }
 
-        .card {
-            background: rgba(0,0,0,0.45);
-            padding: 30px 40px;
-            border-radius: 20px;
-            backdrop-filter: blur(6px);
-            text-align: center;
-            width: 90%;
-            max-width: 380px;
-        }
+    /* 动态背景 canvas */
+    #weather-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
+    }
 
-        h1, h2, h3, p {
-            margin: 6px 0;
-        }
+    .card {
+        background: rgba(0,0,0,0.35);
+        padding: 30px 40px;
+        border-radius: 20px;
+        backdrop-filter: blur(6px);
+        text-align: center;
+        width: 90%;
+        max-width: 380px;
+    }
 
-        #icon {
-            width: 90px;
-        }
+    input {
+        width: 80%;
+        padding: 10px;
+        border-radius: 10px;
+        border: none;
+        margin-top: 10px;
+        font-size: 16px;
+        outline: none;
+    }
 
-        input {
-            width: 80%;
-            padding: 10px;
-            border-radius: 10px;
-            border: none;
-            margin-top: 10px;
-            font-size: 16px;
-            outline: none;
-        }
-
-        button {
-            margin-top: 10px;
-            padding: 10px 15px;
-            border-radius: 10px;
-            border: none;
-            background: #ffffff88;
-            color: black;
-            font-weight: bold;
-            cursor: pointer;
-        }
-    </style>
+    button {
+        margin-top: 10px;
+        padding: 10px 15px;
+        border-radius: 10px;
+        border: none;
+        background: #ffffff88;
+        color: black;
+        font-weight: bold;
+        cursor: pointer;
+    }
+</style>
 </head>
 <body>
 
+<canvas id="weather-bg"></canvas>
+
 <div class="card">
     <h1 id="city">加载中...</h1>
-    <img id="icon" src="">
+    <img id="icon" src="" width="90">
     <h2 id="temp"></h2>
     <h3 id="condition"></h3>
-
     <p id="range"></p>
     <p id="wind"></p>
     <p id="humidity"></p>
@@ -79,84 +80,177 @@
 </div>
 
 <script>
-    const API_KEY = "0871934c91a1479984b40316250912";
+/* -----------------------------
+   动态天气背景（苹果天气风）
+------------------------------*/
+const canvas = document.getElementById("weather-bg");
+const ctx = canvas.getContext("2d");
 
-    // 背景图根据天气变化
-    function setBackground(condition) {
-        let bg;
+function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+}
+window.addEventListener("resize", resize);
+resize();
 
-        if (/rain|雨/i.test(condition))
-            bg = "url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d')";
-        else if (/cloud|云/i.test(condition))
-            bg = "url('https://images.unsplash.com/photo-1499346030926-9a72daac6c63')";
-        else if (/sun|晴/i.test(condition))
-            bg = "url('https://images.unsplash.com/photo-1501973801540-537f08ccae7b')";
-        else if (/snow|雪/i.test(condition))
-            bg = "url('https://images.unsplash.com/photo-1608889175123-f04eec4cde18')";
-        else
-            bg = "url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee')";
+let particles = [];
 
-        document.body.style.backgroundImage = bg;
+// 创建粒子（雨 / 雪）
+function createParticles(count, type) {
+    particles = [];
+    for (let i = 0; i < count; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            speed: type === "rain" ? 6 + Math.random() * 4 : 1 + Math.random() * 2,
+            size: type === "snow" ? 1.5 + Math.random() * 2 : 2,
+            drift: type === "snow" ? Math.random()*1 - 0.5 : 0,
+            type
+        });
     }
+}
 
-    async function loadWeatherByCity(city) {
-        const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${city}&aqi=no`;
+let currentSky = { top: "#5ab7ff", bottom: "#bdeaff" };
+let weatherStatus = "sun";
 
-        try {
-            const res = await fetch(url);
-            const data = await res.json();
+const skyPresets = {
+    sun:   { top: "#5ab7ff", bottom: "#bdeaff" },
+    cloud: { top: "#7d8fa3", bottom: "#c6d0dd" },
+    rain:  { top: "#4b596a", bottom: "#7e8994" },
+    snow:  { top: "#7fbaff", bottom: "#d3e9ff" },
+    night: { top: "#1a2340", bottom: "#0d1124" }
+};
 
-            updateUI(data);
-        } catch {
-            alert("找不到该城市，请重新输入");
+function setDynamicWeather(t) {
+    t = t.toLowerCase();
+    if (t.includes("rain") || t.includes("雨")) {
+        weatherStatus = "rain";
+        currentSky = skyPresets.rain;
+        createParticles(400, "rain");
+    } else if (t.includes("snow") || t.includes("雪")) {
+        weatherStatus = "snow";
+        currentSky = skyPresets.snow;
+        createParticles(180, "snow");
+    } else if (t.includes("cloud") || t.includes("云")) {
+        weatherStatus = "cloud";
+        currentSky = skyPresets.cloud;
+        createParticles(0);
+    } else if (t.includes("clear") || t.includes("晴")) {
+        weatherStatus = "sun";
+        currentSky = skyPresets.sun;
+        createParticles(0);
+    } else {
+        weatherStatus = "night";
+        currentSky = skyPresets.night;
+        createParticles(50, "snow"); // 星空闪光
+    }
+}
+
+// 动画循环
+function animate() {
+    requestAnimationFrame(animate);
+
+    // 渐变天空
+    const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    g.addColorStop(0, currentSky.top);
+    g.addColorStop(1, currentSky.bottom);
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 云层效果
+    if (weatherStatus === "cloud") {
+        ctx.fillStyle = "rgba(255,255,255,0.07)";
+        for (let i = 0; i < 6; i++) {
+            ctx.beginPath();
+            ctx.ellipse(
+                (Date.now()*0.03 + i*250) % (canvas.width + 400) - 200,
+                canvas.height*0.25 + Math.sin(i)*50,
+                220, 60, 0, 0, 2*Math.PI
+            );
+            ctx.fill();
         }
     }
 
-    function updateUI(data) {
-        const c = data.current;
-
-        document.getElementById("city").innerText = data.location.name;
-        document.getElementById("temp").innerText = `${c.temp_c}°C`;
-        document.getElementById("condition").innerText = c.condition.text;
-        document.getElementById("icon").src = "https:" + c.condition.icon;
-
-        document.getElementById("range").innerText =
-            `最高 ${c.temp_c + 2}°C / 最低 ${c.temp_c - 2}°C（模拟演示）`;
-
-        document.getElementById("wind").innerText = `风速：${c.wind_kph} km/h`;
-        document.getElementById("humidity").innerText = `湿度：${c.humidity}%`;
-        document.getElementById("uv").innerText = `紫外线：${c.uv}`;
-
-        setBackground(c.condition.text);
-    }
-
-    // 搜索框城市查询
-    function searchCity() {
-        const city = document.getElementById("search").value;
-        if (city.trim().length === 0) return;
-        loadWeatherByCity(city);
-    }
-
-    // 自动定位获取天气
-    function autoLocate() {
-        if (!navigator.geolocation) {
-            loadWeatherByCity("Sydney");
-            return;
+    // 下雨/下雪
+    particles.forEach(p => {
+        ctx.beginPath();
+        if (p.type === "rain") {
+            ctx.strokeStyle = "rgba(255,255,255,0.3)";
+            ctx.lineWidth = 1.2;
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p.x, p.y + 12);
+            ctx.stroke();
+        } else if (p.type === "snow") {
+            ctx.fillStyle = "rgba(255,255,255,0.9)";
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
         }
 
-        navigator.geolocation.getCurrentPosition(
-            pos => {
-                const lat = pos.coords.latitude;
-                const lon = pos.coords.longitude;
-                loadWeatherByCity(`${lat},${lon}`);
-            },
-            err => {
-                loadWeatherByCity("Sydney"); // 拒绝定位时默认悉尼
-            }
-        );
+        p.y += p.speed;
+        p.x += p.drift;
+
+        if (p.y > canvas.height) p.y = -10;
+        if (p.x > canvas.width) p.x = 0;
+    });
+}
+animate();
+
+/* -----------------------------
+    天气数据部分
+------------------------------*/
+
+const API_KEY = "0871934c91a1479984b40316250912";
+
+async function loadWeatherByCity(city) {
+    const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${city}&aqi=no`;
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        updateUI(data);
+    } catch {
+        alert("找不到该城市，请重新输入");
+    }
+}
+
+function updateUI(data) {
+    const c = data.current;
+
+    city.innerText = data.location.name;
+    temp.innerText = `${c.temp_c}°C`;
+    condition.innerText = c.condition.text;
+    icon.src = "https:" + c.condition.icon;
+
+    range.innerText = `最高 ${c.temp_c + 2}°C / 最低 ${c.temp_c - 2}°C`;
+    wind.innerText = `风速：${c.wind_kph} km/h`;
+    humidity.innerText = `湿度：${c.humidity}%`;
+    uv.innerText = `紫外线：${c.uv}`;
+
+    // 动态天气背景
+    setDynamicWeather(c.condition.text);
+}
+
+function searchCity() {
+    const city = document.getElementById("search").value;
+    if (city.trim().length === 0) return;
+    loadWeatherByCity(city);
+}
+
+// 自动定位
+function autoLocate() {
+    if (!navigator.geolocation) {
+        loadWeatherByCity("Sydney");
+        return;
     }
 
-    autoLocate();
+    navigator.geolocation.getCurrentPosition(
+        pos => {
+            loadWeatherByCity(`${pos.coords.latitude},${pos.coords.longitude}`);
+        },
+        err => loadWeatherByCity("Sydney")
+    );
+}
+
+autoLocate();
 </script>
 
 </body>
