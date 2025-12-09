@@ -18,8 +18,8 @@
       align-items: stretch;
       padding: 16px;
       background: #050816; /* 真实背景交给 canvas，这里只是兜底色 */
-      overflow-y: auto;    /* 允许上下滚动 */
-      overflow-x: hidden;  /* 禁止横向滚动 */
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     /* 动态天气背景画布 */
@@ -36,16 +36,16 @@
       width: 100%;
       max-width: 960px;
       margin: auto;
-      padding: 18px 16px 24px;
+      padding: 20px 18px 24px;
       border-radius: 32px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+      background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
       backdrop-filter: blur(22px) saturate(1.2);
       -webkit-backdrop-filter: blur(22px) saturate(1.2);
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.18);
       box-shadow: 0 24px 60px rgba(0,0,0,0.45);
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
       min-height: calc(100vh - 32px);
     }
 
@@ -86,7 +86,7 @@
       font-size: 14px;
       background: rgba(255,255,255,0.18);
       color: #fff;
-      min-width: 150px;
+      min-width: 180px;
     }
 
     .search-box button {
@@ -101,11 +101,16 @@
       white-space: nowrap;
     }
 
+    .search-box button:active {
+      transform: scale(.97);
+    }
+
     .now {
       display: grid;
       grid-template-columns: minmax(0,1.3fr) minmax(0,1fr);
       gap: 8px;
       align-items: center;
+      margin-top: 4px;
     }
 
     .temp {
@@ -154,13 +159,14 @@
       letter-spacing: .05em;
       text-transform: uppercase;
       opacity: 0.9;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      padding-left: 2px;
     }
 
     .today-grid {
       display: grid;
       grid-template-columns: repeat(3,minmax(0,1fr));
-      gap: 8px;
+      gap: 10px;
     }
 
     .card-small {
@@ -186,7 +192,7 @@
     footer {
       margin-top: 4px;
       font-size: 11px;
-      opacity: 0.8;
+      opacity: 0.85;
       display: flex;
       justify-content: space-between;
       gap: 8px;
@@ -197,47 +203,91 @@
       white-space: nowrap;
     }
 
-    /* ======= 手机适配优化 ======= */
+    /* ======= 手机端美化 ======= */
     @media (max-width: 640px) {
       body {
         padding: 8px;
       }
 
       .app {
-        padding: 16px 12px 20px;
-        border-radius: 24px;
+        padding: 16px 14px 18px;
+        border-radius: 26px;
         min-height: calc(100vh - 16px);
+        gap: 16px;
       }
 
       header.top {
         flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+      }
+
+      .city-block {
         align-items: flex-start;
       }
 
+      .city {
+        font-size: 24px;
+      }
+
+      .time {
+        font-size: 12px;
+      }
+
       .search-box {
-        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
       }
 
       .search-box input {
-        flex: 1;
+        width: 100%;
         min-width: 0;
+        padding-block: 9px;
       }
 
       .search-box button {
-        padding-inline: 10px;
+        width: 100%;
+        padding-block: 9px;
       }
 
       .now {
         grid-template-columns: 1fr;
-        row-gap: 12px;
+        row-gap: 10px;
+        text-align: center;
+      }
+
+      .temp-block {
+        align-items: center;
       }
 
       .temp {
-        font-size: 60px;
+        font-size: 64px;
+      }
+
+      .right-now {
+        align-items: center;
+      }
+
+      .now-icon {
+        width: 56px;
+        height: 56px;
       }
 
       .today-grid {
-        grid-template-columns: repeat(2, minmax(0,1fr));
+        grid-template-columns: repeat(2,minmax(0,1fr));
+        gap: 8px;
+      }
+
+      .card-small {
+        padding: 9px 10px;
+        border-radius: 14px;
+      }
+
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
       }
     }
   </style>
@@ -634,7 +684,7 @@
     } else {
       weatherMode = "sun";
       if (timeOfDay === "evening")      targetSky = skyPresets.sun_even;
-      else if (timeOfDay === "dawn")    targetSky = skyPresets.sun_dawn;
+      else if (timeOfDay === "dawn")    targetSky = sun_dawn = skyPresets.sun_dawn;
       else                              targetSky = skyPresets.sun_day;
       windX = 0.4;
       rainDrops = [];
