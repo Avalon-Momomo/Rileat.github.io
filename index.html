@@ -18,7 +18,8 @@
       align-items: stretch;
       padding: 16px;
       background: #050816; /* 真实背景交给 canvas，这里只是兜底色 */
-      overflow: hidden;
+      overflow-y: auto;    /* 允许上下滚动 */
+      overflow-x: hidden;  /* 禁止横向滚动 */
     }
 
     /* 动态天气背景画布 */
@@ -45,6 +46,7 @@
       display: flex;
       flex-direction: column;
       gap: 16px;
+      min-height: calc(100vh - 32px);
     }
 
     header.top {
@@ -75,6 +77,7 @@
       gap: 8px;
       align-items: center;
     }
+
     .search-box input {
       padding: 8px 12px;
       border-radius: 999px;
@@ -85,6 +88,7 @@
       color: #fff;
       min-width: 150px;
     }
+
     .search-box button {
       border-radius: 999px;
       border: none;
@@ -102,13 +106,6 @@
       grid-template-columns: minmax(0,1.3fr) minmax(0,1fr);
       gap: 8px;
       align-items: center;
-    }
-
-    @media (max-width: 640px) {
-      .now {
-        grid-template-columns: 1fr;
-        row-gap: 12px;
-      }
     }
 
     .temp {
@@ -166,12 +163,6 @@
       gap: 8px;
     }
 
-    @media (max-width: 640px) {
-      .today-grid {
-        grid-template-columns: repeat(2,minmax(0,1fr));
-      }
-    }
-
     .card-small {
       padding: 10px 12px;
       border-radius: 16px;
@@ -204,6 +195,50 @@
 
     footer span {
       white-space: nowrap;
+    }
+
+    /* ======= 手机适配优化 ======= */
+    @media (max-width: 640px) {
+      body {
+        padding: 8px;
+      }
+
+      .app {
+        padding: 16px 12px 20px;
+        border-radius: 24px;
+        min-height: calc(100vh - 16px);
+      }
+
+      header.top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .search-box {
+        width: 100%;
+      }
+
+      .search-box input {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .search-box button {
+        padding-inline: 10px;
+      }
+
+      .now {
+        grid-template-columns: 1fr;
+        row-gap: 12px;
+      }
+
+      .temp {
+        font-size: 60px;
+      }
+
+      .today-grid {
+        grid-template-columns: repeat(2, minmax(0,1fr));
+      }
     }
   </style>
 </head>
@@ -288,15 +323,14 @@
   window.addEventListener("resize", resizeCanvas);
   resizeCanvas();
 
-  // 粒子容器
   var rainDrops = [];
   var snowFlakes = [];
   var stars = [];
   var foregroundClouds = [];
   var backgroundClouds = [];
 
-  var weatherMode = "sun";   // sun / cloud / rain / storm / snow / night
-  var timeOfDay = "day";     // day / evening / night / dawn
+  var weatherMode = "sun";
+  var timeOfDay = "day";
   var windX = 0;
 
   var targetSky = { top: "#57A8FF", bottom: "#CBE7FF" };
@@ -466,7 +500,6 @@
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 夜晚星星
     if (weatherMode === "night") {
       for (var i = 0; i < stars.length; i++) {
         var s = stars[i];
@@ -480,14 +513,12 @@
       }
     }
 
-    // 太阳 / 月亮
     if (weatherMode !== "night") {
       drawSunOrMoon("sun");
     } else {
       drawSunOrMoon("moon");
     }
 
-    // 云层
     if (["sun","cloud","rain","storm","snow"].indexOf(weatherMode) !== -1) {
       for (var j = 0; j < backgroundClouds.length; j++) {
         var cb = backgroundClouds[j];
@@ -504,7 +535,6 @@
       }
     }
 
-    // 雨
     if (weatherMode === "rain" || weatherMode === "storm") {
       ctx.strokeStyle = "rgba(255,255,255,0.45)";
       ctx.lineWidth = 1.2;
@@ -530,7 +560,6 @@
       }
     }
 
-    // 雪
     if (weatherMode === "snow") {
       ctx.fillStyle = "rgba(255,255,255,0.96)";
       for (var n = 0; n < snowFlakes.length; n++) {
@@ -615,8 +644,6 @@
     }
   }
 
-  /* ================== WeatherAPI + 苹果 UI ================== */
-
   var API_KEY = "0871934c91a1479984b40316250912";
 
   var cityEl     = document.getElementById("city");
@@ -695,7 +722,6 @@
     var now = new Date();
     updatedEl.textContent = "上次更新：" + now.toLocaleTimeString();
 
-    // 动态背景效果
     setWeatherVisual(c.condition.text, loc.localtime, c.is_day === 1);
   }
 
@@ -716,7 +742,6 @@
     );
   }
 
-  // 初始加载：尝试定位
   autoLocate();
 </script>
 
