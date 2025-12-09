@@ -17,7 +17,7 @@
       justify-content: center;
       align-items: stretch;
       padding: 16px;
-      background: #050816; /* 真实背景交给 canvas，这里只是兜底色 */
+      background: #050816; /* 背景主色，真实动态效果交给 canvas */
       overflow-y: auto;
       overflow-x: hidden;
     }
@@ -32,22 +32,23 @@
       display: block;
     }
 
-    /* —— 桌面样式：保持你原来喜欢的卡片布局 —— */
+    /* —— 默认（桌面为主）样式 —— */
     .app {
       width: 100%;
-      max-width: 960px;
-      margin: auto;
-      padding: 18px 16px 24px;
+      max-width: 420px;           /* 中间一小块卡片 */
+      margin: 72px auto;          /* 上下留白，居中 */
+      padding: 22px 20px 24px;
       border-radius: 32px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
+      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.05));
       backdrop-filter: blur(22px) saturate(1.2);
       -webkit-backdrop-filter: blur(22px) saturate(1.2);
-      border: 1px solid rgba(255,255,255,0.2);
-      box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.18);
+      box-shadow:
+        0 22px 55px rgba(0,0,0,0.45),
+        inset 0 0 18px rgba(255,255,255,0.18);
       display: flex;
       flex-direction: column;
-      gap: 16px;
-      min-height: calc(100vh - 32px);
+      gap: 18px;
     }
 
     header.top {
@@ -100,10 +101,12 @@
       font-weight: 500;
       cursor: pointer;
       white-space: nowrap;
+      transition: transform .08s ease, background .15s ease;
     }
 
     .search-box button:active {
       transform: scale(.97);
+      background: rgba(255,255,255,0.3);
     }
 
     .now {
@@ -111,6 +114,7 @@
       grid-template-columns: minmax(0,1.3fr) minmax(0,1fr);
       gap: 8px;
       align-items: center;
+      margin-top: 4px;
     }
 
     .temp {
@@ -159,13 +163,14 @@
       letter-spacing: .05em;
       text-transform: uppercase;
       opacity: 0.9;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
+      padding-left: 2px;
     }
 
     .today-grid {
       display: grid;
       grid-template-columns: repeat(3,minmax(0,1fr));
-      gap: 8px;
+      gap: 10px;
     }
 
     .card-small {
@@ -191,7 +196,7 @@
     footer {
       margin-top: 4px;
       font-size: 11px;
-      opacity: 0.8;
+      opacity: 0.85;
       display: flex;
       justify-content: space-between;
       gap: 8px;
@@ -202,16 +207,18 @@
       white-space: nowrap;
     }
 
-    /* ======= 手机端美化：只在 <= 640px 时生效，不影响 PC 版 ======= */
+    /* —— 手机端美化：只在 <= 640px 生效，不影响桌面 —— */
     @media (max-width: 640px) {
       body {
         padding: 8px;
       }
 
       .app {
-        padding: 16px 14px 18px;
+        max-width: none;
+        width: calc(100% - 24px);  /* 稍微贴边一点，像 App */
+        margin: 12px auto 16px;
+        padding: 18px 16px 20px;
         border-radius: 26px;
-        min-height: calc(100vh - 16px);
         gap: 16px;
       }
 
@@ -378,8 +385,8 @@
   var foregroundClouds = [];
   var backgroundClouds = [];
 
-  var weatherMode = "sun";
-  var timeOfDay = "day";
+  var weatherMode = "sun"; // sun / cloud / rain / storm / snow / night
+  var timeOfDay = "day";   // day / evening / night / dawn
   var windX = 0;
 
   var targetSky = { top: "#57A8FF", bottom: "#CBE7FF" };
@@ -508,15 +515,6 @@
     ctx.fill();
   }
 
-  function lerpColor(c1, c2, t) {
-    var a = hexToRgb(c1);
-    var b = hexToRgb(c2);
-    var r = Math.round(a.r + (b.r - a.r) * t);
-    var g = Math.round(a.g + (b.g - a.g) * t);
-    var b2 = Math.round(a.b + (b.b - a.b) * t);
-    return "rgb(" + r + "," + g + "," + b2 + ")";
-  }
-
   function hexToRgb(c) {
     if (c.indexOf("rgb") === 0) {
       var m = c.match(/\d+/g);
@@ -530,6 +528,15 @@
     }
     var num = parseInt(hex, 16);
     return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+  }
+
+  function lerpColor(c1, c2, t) {
+    var a = hexToRgb(c1);
+    var b = hexToRgb(c2);
+    var r = Math.round(a.r + (b.r - a.r) * t);
+    var g = Math.round(a.g + (b.g - a.g) * t);
+    var b2 = Math.round(a.b + (b.b - a.b) * t);
+    return "rgb(" + r + "," + g + "," + b2 + ")";
   }
 
   var lastTime = 0;
@@ -629,20 +636,28 @@
 
   function setWeatherVisual(conditionText, localtimeStr, isDayFlag) {
     var text = "";
-    if (conditionText) text = conditionText.toLowerCase();
+    if (conditionText) {
+      text = conditionText.toLowerCase();
+    }
 
     var hour = null;
     if (localtimeStr) {
-      var m = localtimeStr.match(/\d{4}-\d{2}-\d2 (\d{2})/);
-      if (!m) m = localtimeStr.match(/\d{4}-\d{2}-\d{2} (\d{2})/); /* 修正一下兼容 */
-      if (m) hour = parseInt(m[1], 10);
+      var m = localtimeStr.match(/\d{4}-\d{2}-\d{2} (\d{2})/);
+      if (m) {
+        hour = parseInt(m[1], 10);
+      }
     }
 
     if (hour !== null) {
-      if (hour >= 20 || hour < 5)       timeOfDay = "night";
-      else if (hour >= 17)              timeOfDay = "evening";
-      else if (hour < 8)                timeOfDay = "dawn";
-      else                              timeOfDay = "day";
+      if (hour >= 20 || hour < 5) {
+        timeOfDay = "night";
+      } else if (hour >= 17) {
+        timeOfDay = "evening";
+      } else if (hour < 8) {
+        timeOfDay = "dawn";
+      } else {
+        timeOfDay = "day";
+      }
     } else {
       timeOfDay = isDayFlag ? "day" : "night";
     }
@@ -683,9 +698,13 @@
       snowFlakes = [];
     } else {
       weatherMode = "sun";
-      if (timeOfDay === "evening")      targetSky = skyPresets.sun_even;
-      else if (timeOfDay === "dawn")    targetSky = skyPresets.sun_dawn;
-      else                              targetSky = skyPresets.sun_day;
+      if (timeOfDay === "evening") {
+        targetSky = skyPresets.sun_even;
+      } else if (timeOfDay === "dawn") {
+        targetSky = skyPresets.sun_dawn;
+      } else {
+        targetSky = skyPresets.sun_day;
+      }
       windX = 0.4;
       rainDrops = [];
       snowFlakes = [];
@@ -693,6 +712,8 @@
       stars = [];
     }
   }
+
+  /* ================== WeatherAPI + UI ================== */
 
   var API_KEY = "0871934c91a1479984b40316250912";
 
@@ -730,8 +751,13 @@
   locBtn.addEventListener("click", autoLocate);
 
   function fetchWeatherByQuery(q) {
-    var url = "https://api.weatherapi.com/v1/current.json?key=" +
-              API_KEY + "&q=" + encodeURIComponent(q) + "&aqi=no";
+    var url =
+      "https://api.weatherapi.com/v1/current.json?key=" +
+      API_KEY +
+      "&q=" +
+      encodeURIComponent(q) +
+      "&aqi=no";
+
     fetch(url)
       .then(function (res) { return res.json(); })
       .then(function (data) {
