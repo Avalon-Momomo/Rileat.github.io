@@ -32,20 +32,21 @@
       display: block;
     }
 
+    /* —— 桌面样式：保持你原来喜欢的卡片布局 —— */
     .app {
       width: 100%;
       max-width: 960px;
       margin: auto;
-      padding: 20px 18px 24px;
+      padding: 18px 16px 24px;
       border-radius: 32px;
-      background: linear-gradient(145deg, rgba(255,255,255,0.16), rgba(255,255,255,0.04));
+      background: linear-gradient(145deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03));
       backdrop-filter: blur(22px) saturate(1.2);
       -webkit-backdrop-filter: blur(22px) saturate(1.2);
-      border: 1px solid rgba(255,255,255,0.18);
+      border: 1px solid rgba(255,255,255,0.2);
       box-shadow: 0 24px 60px rgba(0,0,0,0.45);
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 16px;
       min-height: calc(100vh - 32px);
     }
 
@@ -86,7 +87,7 @@
       font-size: 14px;
       background: rgba(255,255,255,0.18);
       color: #fff;
-      min-width: 180px;
+      min-width: 150px;
     }
 
     .search-box button {
@@ -110,7 +111,6 @@
       grid-template-columns: minmax(0,1.3fr) minmax(0,1fr);
       gap: 8px;
       align-items: center;
-      margin-top: 4px;
     }
 
     .temp {
@@ -159,14 +159,13 @@
       letter-spacing: .05em;
       text-transform: uppercase;
       opacity: 0.9;
-      margin-bottom: 6px;
-      padding-left: 2px;
+      margin-bottom: 4px;
     }
 
     .today-grid {
       display: grid;
       grid-template-columns: repeat(3,minmax(0,1fr));
-      gap: 10px;
+      gap: 8px;
     }
 
     .card-small {
@@ -192,7 +191,7 @@
     footer {
       margin-top: 4px;
       font-size: 11px;
-      opacity: 0.85;
+      opacity: 0.8;
       display: flex;
       justify-content: space-between;
       gap: 8px;
@@ -203,7 +202,7 @@
       white-space: nowrap;
     }
 
-    /* ======= 手机端美化 ======= */
+    /* ======= 手机端美化：只在 <= 640px 时生效，不影响 PC 版 ======= */
     @media (max-width: 640px) {
       body {
         padding: 8px;
@@ -634,7 +633,8 @@
 
     var hour = null;
     if (localtimeStr) {
-      var m = localtimeStr.match(/\d{4}-\d{2}-\d{2} (\d{2})/);
+      var m = localtimeStr.match(/\d{4}-\d{2}-\d2 (\d{2})/);
+      if (!m) m = localtimeStr.match(/\d{4}-\d{2}-\d{2} (\d{2})/); /* 修正一下兼容 */
       if (m) hour = parseInt(m[1], 10);
     }
 
@@ -684,7 +684,7 @@
     } else {
       weatherMode = "sun";
       if (timeOfDay === "evening")      targetSky = skyPresets.sun_even;
-      else if (timeOfDay === "dawn")    targetSky = sun_dawn = skyPresets.sun_dawn;
+      else if (timeOfDay === "dawn")    targetSky = skyPresets.sun_dawn;
       else                              targetSky = skyPresets.sun_day;
       windX = 0.4;
       rainDrops = [];
