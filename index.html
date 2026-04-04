@@ -1,13 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>天气 · Apple 风精简版</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
+  <meta charset="UTF-8" />
+  <title>Florist Home</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <style>
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       min-height: 100vh;
@@ -17,12 +15,10 @@
       justify-content: center;
       align-items: stretch;
       padding: 16px;
-      background: #050816; /* 背景主色，真实动态效果交给 canvas */
+      background: #050816;
       overflow-y: auto;
       overflow-x: hidden;
     }
-
-    /* 动态天气背景画布 */
     #weather-bg {
       position: fixed;
       inset: 0;
@@ -31,50 +27,40 @@
       z-index: -1;
       display: block;
     }
-
-    /* —— 默认（桌面为主）样式 —— */
     .app {
       width: 100%;
-      max-width: 420px;           /* 中间一小块卡片 */
-      margin: 72px auto;          /* 上下留白，居中 */
+      max-width: 420px;
+      margin: 72px auto;
       padding: 22px 20px 20px;
       border-radius: 32px;
       background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
       backdrop-filter: blur(22px) saturate(1.2);
       -webkit-backdrop-filter: blur(22px) saturate(1.2);
       border: 1px solid rgba(255,255,255,0.18);
-      box-shadow:
-        0 22px 55px rgba(0,0,0,0.45),
-        inset 0 0 18px rgba(255,255,255,0.18);
+      box-shadow: 0 22px 55px rgba(0,0,0,0.45), inset 0 0 18px rgba(255,255,255,0.18);
       display: flex;
       flex-direction: column;
       gap: 18px;
     }
-
-    /* 顶部：城市 + 搜索框（都在卡片内） */
     header.top {
       display: grid;
       grid-template-columns: 1.2fr 1fr;
       align-items: center;
       gap: 12px;
     }
-
     .city-block {
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
-
     .city {
       font-size: 26px;
       font-weight: 600;
     }
-
     .time {
       font-size: 13px;
       opacity: 0.85;
     }
-
     .search-box {
       justify-self: end;
       display: flex;
@@ -83,11 +69,7 @@
       position: relative;
       transition: transform .15s ease;
     }
-
-    .search-box:focus-within {
-      transform: translateY(-1px);
-    }
-
+    .search-box:focus-within { transform: translateY(-1px); }
     .search-box input {
       padding: 8px 12px;
       border-radius: 999px;
@@ -99,20 +81,13 @@
       width: 170px;
       transition: background .18s ease, box-shadow .18s ease, transform .12s ease;
     }
-
-    .search-box input::placeholder {
-      color: rgba(255,255,255,0.7);
-    }
-
+    .search-box input::placeholder { color: rgba(255,255,255,0.7); }
     .search-box input:focus {
       background: rgba(255,255,255,0.26);
-      box-shadow:
-        0 0 0 1px rgba(255,255,255,0.9),
-        0 0 18px rgba(0,0,0,0.7);
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.9), 0 0 18px rgba(0,0,0,0.7);
       transform: translateY(-1px);
     }
-
-    .search-box button {
+    .search-box button, .enter-btn {
       border-radius: 999px;
       border: none;
       padding: 8px 12px;
@@ -123,13 +98,51 @@
       cursor: pointer;
       white-space: nowrap;
       transition: transform .08s ease, background .15s ease;
+      text-decoration: none;
+      text-align: center;
+      display: inline-block;
     }
-
-    .search-box button:active {
+    .search-box button:active, .enter-btn:active {
       transform: scale(.97);
       background: rgba(255,255,255,0.3);
     }
-
+    .hero {
+      border-radius: 24px;
+      padding: 16px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .hero-tag {
+      display: inline-flex;
+      align-self: flex-start;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      background: rgba(255,255,255,0.12);
+    }
+    .hero-title {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+    .hero-desc {
+      font-size: 14px;
+      line-height: 1.7;
+      opacity: 0.92;
+    }
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .enter-btn {
+      background: linear-gradient(135deg, rgba(255,255,255,0.30), rgba(255,255,255,0.14));
+      box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+      padding: 10px 16px;
+    }
     .now {
       display: grid;
       grid-template-columns: minmax(0,1.3fr) minmax(0,1fr);
@@ -137,36 +150,30 @@
       align-items: center;
       margin-top: 4px;
     }
-
     .temp {
       font-size: 72px;
       line-height: 1;
       font-weight: 600;
     }
-
     .temp-block {
       display: flex;
       flex-direction: column;
       gap: 4px;
     }
-
     .condition-main {
       font-size: 18px;
       opacity: 0.9;
     }
-
     .hi-lo {
       font-size: 14px;
       opacity: 0.9;
     }
-
     .right-now {
       display: flex;
       flex-direction: column;
       align-items: flex-end;
       gap: 6px;
     }
-
     .now-icon {
       width: 60px;
       height: 60px;
@@ -175,17 +182,14 @@
       align-items: center;
       justify-content: center;
     }
-
     .now-icon svg {
       width: 100%;
       height: 100%;
     }
-
     .feels {
       font-size: 13px;
       opacity: 0.9;
     }
-
     footer {
       margin-top: 4px;
       font-size: 11px;
@@ -195,72 +199,48 @@
       gap: 8px;
       flex-wrap: wrap;
     }
-
-    footer span {
-      white-space: nowrap;
-    }
-
-    /* —— 手机端美化：只在 <= 640px 生效，不影响桌面 —— */
+    footer span { white-space: nowrap; }
     @media (max-width: 640px) {
-      body {
-        padding: 8px;
-      }
-
+      body { padding: 8px; }
       .app {
         max-width: none;
-        width: calc(100% - 24px);  /* 稍微贴边一点，像 App */
+        width: calc(100% - 24px);
         margin: 12px auto 16px;
         padding: 18px 16px 18px;
         border-radius: 26px;
         gap: 16px;
       }
-
       header.top {
         grid-template-columns: 1fr;
         row-gap: 10px;
       }
-
       .search-box {
         justify-self: stretch;
         flex-direction: column;
         width: 100%;
         align-items: stretch;
       }
-
       .search-box input {
         width: 100%;
         min-width: 0;
         padding-block: 9px;
       }
-
-      .search-box button {
+      .search-box button, .enter-btn {
         width: 100%;
         padding-block: 9px;
       }
-
       .now {
         grid-template-columns: 1fr;
         row-gap: 10px;
         text-align: center;
       }
-
-      .temp-block {
-        align-items: center;
-      }
-
-      .temp {
-        font-size: 64px;
-      }
-
-      .right-now {
-        align-items: center;
-      }
-
+      .temp-block { align-items: center; }
+      .temp { font-size: 64px; }
+      .right-now { align-items: center; }
       .now-icon {
         width: 56px;
         height: 56px;
       }
-
       footer {
         flex-direction: column;
         align-items: flex-start;
@@ -270,7 +250,6 @@
   </style>
 </head>
 <body>
-
 <canvas id="weather-bg"></canvas>
 
 <div class="app">
@@ -286,6 +265,17 @@
       <button id="locBtn">定位</button>
     </div>
   </header>
+
+  <section class="hero">
+    <div class="hero-tag">Personal Floral Home</div>
+    <div class="hero-title">天气主页 + 家庭页面入口</div>
+    <div class="hero-desc">
+      保留你原来的天气首页风格，在首页新增进入按钮。点击后会跳转到另一个单独页面，包含备忘事项、置顶纪念日、家庭点菜和添加菜品。
+    </div>
+    <div class="hero-actions">
+      <a class="enter-btn" href="family.html">进入家庭页面</a>
+    </div>
+  </section>
 
   <main>
     <section class="now">
@@ -309,7 +299,6 @@
 </div>
 
 <script>
-  /* ================== 动态天气背景（画布） ================== */
   var canvas = document.getElementById("weather-bg");
   var ctx = canvas.getContext("2d");
 
@@ -325,11 +314,9 @@
   var stars = [];
   var foregroundClouds = [];
   var backgroundClouds = [];
-
-  var weatherMode = "sun"; // sun / cloud / rain / storm / snow / night
-  var timeOfDay = "day";   // day / evening / night / dawn
+  var weatherMode = "sun";
+  var timeOfDay = "day";
   var windX = 0;
-
   var targetSky = { top: "#57A8FF", bottom: "#CBE7FF" };
   var currentSky = { top: "#57A8FF", bottom: "#CBE7FF" };
 
@@ -345,7 +332,7 @@
   };
 
   function createRain(intensity) {
-    if (intensity === undefined) intensity = 1;
+    intensity = intensity || 1;
     rainDrops = [];
     var base = 400 * (window.innerWidth / 800);
     var count = Math.floor(base * intensity);
@@ -361,7 +348,7 @@
   }
 
   function createSnow(intensity) {
-    if (intensity === undefined) intensity = 1;
+    intensity = intensity || 1;
     snowFlakes = [];
     var base = 160 * (window.innerWidth / 800);
     var count = Math.floor(base * intensity);
@@ -378,8 +365,7 @@
 
   function createStars() {
     stars = [];
-    var count = 140;
-    for (var i = 0; i < count; i++) {
+    for (var i = 0; i < 140; i++) {
       stars.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height * 0.6,
@@ -393,10 +379,7 @@
   function createCloudLayer() {
     foregroundClouds = [];
     backgroundClouds = [];
-    var fgCount = 6;
-    var bgCount = 5;
-
-    for (var i = 0; i < fgCount; i++) {
+    for (var i = 0; i < 6; i++) {
       foregroundClouds.push({
         x: Math.random() * canvas.width,
         y: canvas.height * 0.25 + Math.random() * canvas.height * 0.25,
@@ -405,8 +388,7 @@
         speed: 0.22 + Math.random() * 0.15
       });
     }
-
-    for (var j = 0; j < bgCount; j++) {
+    for (var j = 0; j < 5; j++) {
       backgroundClouds.push({
         x: Math.random() * canvas.width,
         y: canvas.height * 0.12 + Math.random() * canvas.height * 0.18,
@@ -431,7 +413,6 @@
   function drawSunOrMoon(type) {
     var cx = canvas.width * 0.18;
     var cy = canvas.height * 0.22;
-
     var gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, 100);
     if (type === "sun") {
       gradient.addColorStop(0, "rgba(255,255,255,0.95)");
@@ -442,7 +423,6 @@
       gradient.addColorStop(0.4, "rgba(200,220,255,0.8)");
       gradient.addColorStop(1, "rgba(200,220,255,0)");
     }
-
     ctx.fillStyle = gradient;
     ctx.beginPath();
     ctx.arc(cx, cy, 100, 0, Math.PI * 2);
@@ -463,10 +443,7 @@
     }
     var hex = c.replace("#", "");
     if (hex.length === 3) {
-      hex =
-        hex.charAt(0) + hex.charAt(0) +
-        hex.charAt(1) + hex.charAt(1) +
-        hex.charAt(2) + hex.charAt(2);
+      hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
     }
     var num = parseInt(hex, 16);
     return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
@@ -475,31 +452,21 @@
   function lerpColor(c1, c2, t) {
     var a = hexToRgb(c1);
     var b = hexToRgb(c2);
-    var r = Math.round(a.r + (b.r - a.r) * t);
-    var g = Math.round(a.g + (b.g - a.g) * t);
-    var b2 = Math.round(a.b + (b.b - a.b) * t);
-    return "rgb(" + r + "," + g + "," + b2 + ")";
+    return "rgb(" +
+      Math.round(a.r + (b.r - a.r) * t) + "," +
+      Math.round(a.g + (b.g - a.g) * t) + "," +
+      Math.round(a.b + (b.b - a.b) * t) + ")";
   }
 
   function drawGroundGlow() {
-    // 底部环境光晕，让光照更柔和
     var gx = canvas.width * 0.5;
     var gy = canvas.height * 0.9;
     var grad = ctx.createRadialGradient(gx, gy, 0, gx, gy, canvas.height * 0.7);
-
-    var color;
-    if (weatherMode === "sun") {
-      color = "rgba(255,255,255,0.18)";
-    } else if (weatherMode === "rain" || weatherMode === "storm") {
-      color = "rgba(200,220,255,0.12)";
-    } else if (weatherMode === "snow") {
-      color = "rgba(255,255,255,0.22)";
-    } else if (weatherMode === "night") {
-      color = "rgba(120,160,255,0.12)";
-    } else { // cloud
-      color = "rgba(230,235,245,0.14)";
-    }
-
+    var color = "rgba(255,255,255,0.18)";
+    if (weatherMode === "rain" || weatherMode === "storm") color = "rgba(200,220,255,0.12)";
+    if (weatherMode === "snow") color = "rgba(255,255,255,0.22)";
+    if (weatherMode === "night") color = "rgba(120,160,255,0.12)";
+    if (weatherMode === "cloud") color = "rgba(230,235,245,0.14)";
     grad.addColorStop(0, color);
     grad.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = grad;
@@ -513,10 +480,8 @@
     if (!dt) dt = 1;
     lastTime = t;
 
-    // 天空颜色缓动更丝滑
-    var lerp = 0.02;
-    currentSky.top = lerpColor(currentSky.top, targetSky.top, lerp);
-    currentSky.bottom = lerpColor(currentSky.bottom, targetSky.bottom, lerp);
+    currentSky.top = lerpColor(currentSky.top, targetSky.top, 0.02);
+    currentSky.bottom = lerpColor(currentSky.bottom, targetSky.bottom, 0.02);
 
     var g = ctx.createLinearGradient(0, 0, 0, canvas.height);
     g.addColorStop(0, currentSky.top);
@@ -524,10 +489,8 @@
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 环境光晕
     drawGroundGlow();
 
-    // 星星（夜晚）
     if (weatherMode === "night") {
       for (var i = 0; i < stars.length; i++) {
         var s = stars[i];
@@ -541,14 +504,8 @@
       }
     }
 
-    // 太阳 / 月亮
-    if (weatherMode !== "night") {
-      drawSunOrMoon("sun");
-    } else {
-      drawSunOrMoon("moon");
-    }
+    drawSunOrMoon(weatherMode !== "night" ? "sun" : "moon");
 
-    // 云层
     if (["sun", "cloud", "rain", "storm", "snow"].indexOf(weatherMode) !== -1) {
       for (var j = 0; j < backgroundClouds.length; j++) {
         var cb = backgroundClouds[j];
@@ -556,7 +513,6 @@
         if (cb.x - cb.w > canvas.width) cb.x = -cb.w;
         drawCloud(cb.x, cb.y, cb.w, cb.h, 0.18);
       }
-
       for (var k = 0; k < foregroundClouds.length; k++) {
         var cf = foregroundClouds[k];
         cf.x += cf.speed * dt;
@@ -565,7 +521,6 @@
       }
     }
 
-    // 雨
     if (weatherMode === "rain" || weatherMode === "storm") {
       ctx.strokeStyle = "rgba(255,255,255,0.45)";
       ctx.lineWidth = 1.2;
@@ -575,24 +530,19 @@
         ctx.moveTo(d.x, d.y);
         ctx.lineTo(d.x + d.speedX * 1.2, d.y + d.len);
         ctx.stroke();
-
         d.x += d.speedX * dt;
         d.y += d.speedY * dt;
-
         if (d.y > canvas.height + 20) {
           d.y = -20;
           d.x = Math.random() * canvas.width;
         }
       }
-
-      // 闪电
       if (weatherMode === "storm" && Math.random() < 0.004) {
         ctx.fillStyle = "rgba(255,255,255,0.2)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
     }
 
-    // 雪
     if (weatherMode === "snow") {
       ctx.fillStyle = "rgba(255,255,255,0.96)";
       for (var n = 0; n < snowFlakes.length; n++) {
@@ -612,29 +562,18 @@
   requestAnimationFrame(animate);
 
   function setWeatherVisual(conditionText, localtimeStr, isDayFlag) {
-    var text = "";
-    if (conditionText) {
-      text = conditionText.toLowerCase();
-    }
-
+    var text = (conditionText || "").toLowerCase();
     var hour = null;
     if (localtimeStr) {
       var m = localtimeStr.match(/\d{4}-\d{2}-\d{2} (\d{2})/);
-      if (m) {
-        hour = parseInt(m[1], 10);
-      }
+      if (m) hour = parseInt(m[1], 10);
     }
 
     if (hour !== null) {
-      if (hour >= 20 || hour < 5) {
-        timeOfDay = "night";
-      } else if (hour >= 17) {
-        timeOfDay = "evening";
-      } else if (hour < 8) {
-        timeOfDay = "dawn";
-      } else {
-        timeOfDay = "day";
-      }
+      if (hour >= 20 || hour < 5) timeOfDay = "night";
+      else if (hour >= 17) timeOfDay = "evening";
+      else if (hour < 8) timeOfDay = "dawn";
+      else timeOfDay = "day";
     } else {
       timeOfDay = isDayFlag ? "day" : "night";
     }
@@ -678,13 +617,7 @@
       snowFlakes = [];
     } else {
       weatherMode = "sun";
-      if (timeOfDay === "evening") {
-        targetSky = skyPresets.sun_even;
-      } else if (timeOfDay === "dawn") {
-        targetSky = skyPresets.sun_dawn;
-      } else {
-        targetSky = skyPresets.sun_day;
-      }
+      targetSky = timeOfDay === "evening" ? skyPresets.sun_even : (timeOfDay === "dawn" ? skyPresets.sun_dawn : skyPresets.sun_day);
       windX = 0.4;
       rainDrops = [];
       snowFlakes = [];
@@ -693,184 +626,37 @@
     }
   }
 
-  /* ================== Apple SF 风格天气图标（SVG） ================== */
   var iconWrapper = document.getElementById("iconWrapper");
 
   function setWeatherIcon() {
-    var svg = "";
-
+    var svg = '';
     if (weatherMode === "sun") {
-      if (timeOfDay === "dawn" || timeOfDay === "evening") {
-        svg = sunCloudSvg();
-      } else {
-        svg = sunSvg();
-      }
+      svg = '<svg viewBox="0 0 64 64" fill="none"><circle cx="32" cy="32" r="18" fill="#FFE58F"/><g stroke="#FFE9A9" stroke-width="3" stroke-linecap="round"><line x1="32" y1="8" x2="32" y2="2"/><line x1="32" y1="62" x2="32" y2="56"/><line x1="8" y1="32" x2="2" y2="32"/><line x1="62" y1="32" x2="56" y2="32"/><line x1="13" y1="13" x2="8" y2="8"/><line x1="51" y1="51" x2="56" y2="56"/><line x1="13" y1="51" x2="8" y2="56"/><line x1="51" y1="13" x2="56" y2="8"/></g></svg>';
     } else if (weatherMode === "cloud") {
-      if (timeOfDay === "night") {
-        svg = moonCloudSvg();
-      } else {
-        svg = cloudSvg();
-      }
+      svg = '<svg viewBox="0 0 64 64" fill="none"><path d="M23 28c1.3-6 6.6-10.5 13-10.5 7.2 0 13 5.8 13 13 4 0.4 7 3.9 7 8 0 4.4-3.6 8-8 8H23c-5.5 0-10-4.5-10-10 0-5 3.7-9.1 8.4-9.9C21.9 26 22.4 27 23 28Z" fill="white" fill-opacity="0.96"/></svg>';
     } else if (weatherMode === "rain") {
-      if (timeOfDay === "night") {
-        svg = moonRainSvg();
-      } else {
-        svg = cloudRainSvg();
-      }
+      svg = '<svg viewBox="0 0 64 64" fill="none"><path d="M23 26c1.4-6 6.7-10.3 13-10.3 7.3 0 13.2 5.9 13.2 13.2 3.9 0.4 6.9 3.7 6.9 7.7 0 4.3-3.5 7.9-7.9 7.9H24c-5.6 0-10.2-4.6-10.2-10.2 0-5 3.6-9.1 8.3-9.9 0.3-1.1 0.6-1.9 0.9-2.4Z" fill="white" fill-opacity="0.96"/><g stroke="#B9D8FF" stroke-width="2.3" stroke-linecap="round"><line x1="24" y1="48" x2="22" y2="54"/><line x1="32" y1="48" x2="30" y2="54"/><line x1="40" y1="48" x2="38" y2="54"/><line x1="48" y1="48" x2="46" y2="54"/></g></svg>';
     } else if (weatherMode === "storm") {
-      svg = cloudBoltRainSvg();
+      svg = '<svg viewBox="0 0 64 64" fill="none"><path d="M23 26c1.4-6 6.7-10.3 13-10.3 7.3 0 13.2 5.9 13.2 13.2 3.9 0.4 6.9 3.7 6.9 7.7 0 4.3-3.5 7.9-7.9 7.9H24c-5.6 0-10.2-4.6-10.2-10.2 0-5 3.6-9.1 8.3-9.9 0.3-1.1 0.6-1.9 0.9-2.4Z" fill="white" fill-opacity="0.96"/><path d="M30 50l4-8h-4l4-8" stroke="#FFD36B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     } else if (weatherMode === "snow") {
-      svg = cloudSnowSvg();
-    } else if (weatherMode === "night") {
-      svg = moonStarsSvg();
+      svg = '<svg viewBox="0 0 64 64" fill="none"><path d="M23 26c1.4-6 6.7-10.3 13-10.3 7.3 0 13.2 5.9 13.2 13.2 3.9 0.4 6.9 3.7 6.9 7.7 0 4.3-3.5 7.9-7.9 7.9H24c-5.6 0-10.2-4.6-10.2-10.2 0-5 3.6-9.1 8.3-9.9 0.3-1.1 0.6-1.9 0.9-2.4Z" fill="white" fill-opacity="0.96"/><g fill="#E5F2FF"><circle cx="26" cy="50" r="2"/><circle cx="34" cy="52" r="2"/><circle cx="42" cy="50" r="2"/></g></svg>';
     } else {
-      svg = sunSvg();
+      svg = '<svg viewBox="0 0 64 64" fill="none"><path d="M41 14c-2 8.5-1.3 14.9 2.1 20.3C47 40 52.5 44 59 46.5 56.2 50.3 51.6 52.7 46.5 52.7 36.6 52.7 28.5 44.6 28.5 34.7 28.5 25.7 34.1 18.3 41 14Z" fill="rgba(236,241,255,0.95)"/></svg>';
     }
-
     iconWrapper.innerHTML = svg;
   }
 
-  function sunSvg() {
-    return (
-      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<defs>' +
-          '<radialGradient id="sunCore" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(32 32) rotate(90) scale(18 18)">' +
-            '<stop stop-color="#FFF9D4"/>' +
-            '<stop offset="1" stop-color="#FFE58F"/>' +
-          '</radialGradient>' +
-        '</defs>' +
-        '<circle cx="32" cy="32" r="18" fill="url(#sunCore)"/>' +
-        '<g stroke="#FFE9A9" stroke-width="3" stroke-linecap="round" opacity="0.9">' +
-          '<line x1="32" y1="8"  x2="32" y2="2"/>' +
-          '<line x1="32" y1="62" x2="32" y2="56"/>' +
-          '<line x1="8"  y1="32" x2="2"  y2="32"/>' +
-          '<line x1="62" y1="32" x2="56" y2="32"/>' +
-          '<line x1="13" y1="13" x2="8"  y2="8"/>' +
-          '<line x1="51" y1="51" x2="56" y2="56"/>' +
-          '<line x1="13" y1="51" x2="8"  y2="56"/>' +
-          '<line x1="51" y1="13" x2="56" y2="8"/>' +
-        '</g>' +
-      '</svg>'
-    );
-  }
-
-  function sunCloudSvg() {
-    return (
-      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<defs>' +
-          '<radialGradient id="sunCore2" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(22 20) rotate(90) scale(12 12)">' +
-            '<stop stop-color="#FFF9D4"/>' +
-            '<stop offset="1" stop-color="#FFE58F"/>' +
-          '</radialGradient>' +
-        '</defs>' +
-        '<circle cx="22" cy="20" r="12" fill="url(#sunCore2)" opacity="0.95"/>' +
-        '<path d="M21 40c0-5.5 4.5-10 10-10 4.1 0 7.7 2.4 9.2 6 3.5-.2 6.8 2.4 7.1 6 0 0.2 0 .4 0 .6-0.2 4-3.5 7.1-7.6 7.1H27c-5.2 0-9.3-4.2-9.3-9.3 0-3 1.4-5.7 3.8-7.4C21.1 35.3 21 37.6 21 40Z" fill="white" fill-opacity="0.96"/>' +
-      '</svg>'
-    );
-  }
-
-  function cloudSvg() {
-    return (
-      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M23 28c1.3-6 6.6-10.5 13-10.5 7.2 0 13 5.8 13 13 4 0.4 7 3.9 7 8 0 4.4-3.6 8-8 8H23c-5.5 0-10-4.5-10-10 0-5 3.7-9.1 8.4-9.9C21.9 26 22.4 27 23 28Z" fill="white" fill-opacity="0.96"/>' +
-      '</svg>'
-    );
-  }
-
-  function moonSvgBase() {
-    return (
-      '<path d="M41 14c-2 8.5-1.3 14.9 2.1 20.3C47 40 52.5 44 59 46.5 56.2 50.3 51.6 52.7 46.5 52.7 36.6 52.7 28.5 44.6 28.5 34.7 28.5 25.7 34.1 18.3 41 14Z" fill="rgba(236,241,255,0.95)"/>'
-    );
-  }
-
-  function moonCloudSvg() {
-    return (
-      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        moonSvgBase() +
-        '<path d="M20 36c1.3-5.5 6-9.5 11.7-9.5 6.6 0 12 5.1 12.3 11.7 3.5 0.1 6.3 3 6.3 6.5 0 3.6-2.9 6.5-6.5 6.5H24c-4.9 0-9-4-9-9 0-4.4 3.1-8.1 7-8.9Z" fill="white" fill-opacity="0.96"/>' +
-      '</svg>'
-    );
-  }
-
-  function moonStarsSvg() {
-    return (
-      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        moonSvgBase() +
-        '<circle cx="18" cy="16" r="2" fill="#FFE9A9"/>' +
-        '<circle cx="14" cy="24" r="1.6" fill="#FFE9A9"/>' +
-        '<circle cx="24" cy="20" r="1.8" fill="#FFE9A9"/>' +
-      '</svg>'
-    );
-  }
-
-  function moonRainSvg() {
-    return (
-      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        moonSvgBase() +
-        '<path d="M22 35c1.3-5.2 5.9-9.1 11.4-9.1 6.4 0 11.6 5.1 11.6 11.6 3.4 0.1 6.1 2.9 6.1 6.4 0 3.5-2.8 6.4-6.4 6.4H26.3C21.5 50.3 18 46 18 41.5c0-3.9 2.7-7.2 6.1-8.1Z" fill="white" fill-opacity="0.96"/>' +
-        '<g stroke="#B9D8FF" stroke-width="2.3" stroke-linecap="round">' +
-          '<line x1="26" y1="52" x2="24" y2="58"/>' +
-          '<line x1="34" y1="52" x2="32" y2="58"/>' +
-          '<line x1="42" y1="52" x2="40" y2="58"/>' +
-        '</g>' +
-      '</svg>'
-    );
-  }
-
-  function cloudRainSvg() {
-    return (
-      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M23 26c1.4-6 6.7-10.3 13-10.3 7.3 0 13.2 5.9 13.2 13.2 3.9 0.4 6.9 3.7 6.9 7.7 0 4.3-3.5 7.9-7.9 7.9H24c-5.6 0-10.2-4.6-10.2-10.2 0-5 3.6-9.1 8.3-9.9 0.3-1.1 0.6-1.9 0.9-2.4Z" fill="white" fill-opacity="0.96"/>' +
-        '<g stroke="#B9D8FF" stroke-width="2.3" stroke-linecap="round">' +
-          '<line x1="24" y1="48" x2="22" y2="54"/>' +
-          '<line x1="32" y1="48" x2="30" y2="54"/>' +
-          '<line x1="40" y1="48" x2="38" y2="54"/>' +
-          '<line x1="48" y1="48" x2="46" y2="54"/>' +
-        '</g>' +
-      '</svg>'
-    );
-  }
-
-  function cloudBoltRainSvg() {
-    return (
-      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M23 26c1.4-6 6.7-10.3 13-10.3 7.3 0 13.2 5.9 13.2 13.2 3.9 0.4 6.9 3.7 6.9 7.7 0 4.3-3.5 7.9-7.9 7.9H24c-5.6 0-10.2-4.6-10.2-10.2 0-5 3.6-9.1 8.3-9.9 0.3-1.1 0.6-1.9 0.9-2.4Z" fill="white" fill-opacity="0.96"/>' +
-        '<path d="M30 50l4-8h-4l4-8" stroke="#FFD36B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>' +
-        '<g stroke="#B9D8FF" stroke-width="2.3" stroke-linecap="round">' +
-          '<line x1="44" y1="48" x2="42" y2="54"/>' +
-        '</g>' +
-      '</svg>'
-    );
-  }
-
-  function cloudSnowSvg() {
-    return (
-      '<svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M23 26c1.4-6 6.7-10.3 13-10.3 7.3 0 13.2 5.9 13.2 13.2 3.9 0.4 6.9 3.7 6.9 7.7 0 4.3-3.5 7.9-7.9 7.9H24c-5.6 0-10.2-4.6-10.2-10.2 0-5 3.6-9.1 8.3-9.9 0.3-1.1 0.6-1.9 0.9-2.4Z" fill="white" fill-opacity="0.96"/>' +
-        '<g fill="#E5F2FF">' +
-          '<circle cx="26" cy="50" r="2"/>' +
-          '<circle cx="34" cy="52" r="2"/>' +
-          '<circle cx="42" cy="50" r="2"/>' +
-        '</g>' +
-      '</svg>'
-    );
-  }
-
-  /* ================== WeatherAPI + UI ================== */
-
   var API_KEY = "0871934c91a1479984b40316250912";
-
-  var cityEl     = document.getElementById("city");
-  var timeEl     = document.getElementById("localtime");
-  var tempEl     = document.getElementById("temp");
-  var condEl     = document.getElementById("condition");
-  var hiLoEl     = document.getElementById("hiLo");
-  var feelsEl    = document.getElementById("feelsLike");
-  var updatedEl  = document.getElementById("updated");
-
+  var cityEl = document.getElementById("city");
+  var timeEl = document.getElementById("localtime");
+  var tempEl = document.getElementById("temp");
+  var condEl = document.getElementById("condition");
+  var hiLoEl = document.getElementById("hiLo");
+  var feelsEl = document.getElementById("feelsLike");
+  var updatedEl = document.getElementById("updated");
   var searchInput = document.getElementById("search");
-  var searchBtn   = document.getElementById("searchBtn");
-  var locBtn      = document.getElementById("locBtn");
+  var searchBtn = document.getElementById("searchBtn");
+  var locBtn = document.getElementById("locBtn");
 
   searchBtn.addEventListener("click", function () {
     var val = searchInput.value.trim();
@@ -879,27 +665,17 @@
   });
 
   searchInput.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") {
-      searchBtn.click();
-    }
+    if (e.key === "Enter") searchBtn.click();
   });
 
   locBtn.addEventListener("click", autoLocate);
 
   function fetchWeatherByQuery(q) {
-    var url =
-      "https://api.weatherapi.com/v1/current.json?key=" +
-      API_KEY +
-      "&q=" +
-      encodeURIComponent(q) +
-      "&aqi=no";
-
+    var url = "https://api.weatherapi.com/v1/current.json?key=" + API_KEY + "&q=" + encodeURIComponent(q) + "&aqi=no";
     fetch(url)
       .then(function (res) { return res.json(); })
       .then(function (data) {
-        if (data.error) {
-          throw new Error(data.error.message || "API Error");
-        }
+        if (data.error) throw new Error(data.error.message || "API Error");
         updateUI(data);
       })
       .catch(function (e) {
@@ -910,22 +686,14 @@
 
   function updateUI(data) {
     var loc = data.location;
-    var c   = data.current;
-
+    var c = data.current;
     cityEl.textContent = loc.name + ", " + (loc.region || loc.country);
     timeEl.textContent = "当地时间：" + loc.localtime;
     tempEl.textContent = Math.round(c.temp_c) + "°";
     condEl.textContent = c.condition.text;
-
-    var hi = Math.round(c.temp_c + 2);
-    var lo = Math.round(c.temp_c - 2);
-    hiLoEl.textContent = "最高 " + hi + "° · 最低 " + lo + "°";
-
+    hiLoEl.textContent = "最高 " + Math.round(c.temp_c + 2) + "° · 最低 " + Math.round(c.temp_c - 2) + "°";
     feelsEl.textContent = "体感：" + Math.round(c.feelslike_c) + "°";
-
-    var now = new Date();
-    updatedEl.textContent = "上次更新：" + now.toLocaleTimeString();
-
+    updatedEl.textContent = "上次更新：" + new Date().toLocaleTimeString();
     setWeatherVisual(c.condition.text, loc.localtime, c.is_day === 1);
     setWeatherIcon();
   }
@@ -937,19 +705,15 @@
     }
     navigator.geolocation.getCurrentPosition(
       function (pos) {
-        var q = pos.coords.latitude + "," + pos.coords.longitude;
-        fetchWeatherByQuery(q);
+        fetchWeatherByQuery(pos.coords.latitude + "," + pos.coords.longitude);
       },
-      function (err) {
-        console.warn("定位失败，使用默认城市", err);
+      function () {
         fetchWeatherByQuery("Sydney");
       }
     );
   }
 
-  // 初始加载
   autoLocate();
 </script>
-
 </body>
 </html>

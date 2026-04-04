@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>Family Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+      color: #fff;
+      background:
+        radial-gradient(circle at top left, rgba(126,162,255,.30), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(255,184,220,.18), transparent 30%),
+        linear-gradient(180deg, #0b1020 0%, #121b34 100%);
+      padding: 20px;
+    }
+    .shell {
+      width: 100%;
+      max-width: 980px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .glass {
+      background: linear-gradient(145deg, rgba(255,255,255,0.14), rgba(255,255,255,0.06));
+      backdrop-filter: blur(22px) saturate(1.2);
+      -webkit-backdrop-filter: blur(22px) saturate(1.2);
+      border: 1px solid rgba(255,255,255,0.14);
+      box-shadow: 0 22px 55px rgba(0,0,0,0.35), inset 0 0 18px rgba(255,255,255,0.08);
+      border-radius: 28px;
+    }
+    .hero {
+      padding: 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .hero h1 {
+      margin: 0 0 8px;
+      font-size: 34px;
+      line-height: 1.15;
+    }
+    .hero p {
+      margin: 0;
+      font-size: 14px;
+      line-height: 1.7;
+      opacity: 0.9;
+      max-width: 620px;
+    }
+    .btn, button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      background: rgba(255,255,255,0.18);
+      color: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      text-decoration: none;
+      transition: .15s ease;
+    }
+    .btn:hover, button:hover { background: rgba(255,255,255,0.26); }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .panel {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .panel.full { grid-column: 1 / -1; }
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .sub {
+      font-size: 13px;
+      opacity: 0.76;
+      line-height: 1.6;
+    }
+    .stack { display: flex; flex-direction: column; gap: 10px; }
+    .row2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      outline: none;
+      color: #fff;
+      background: rgba(255,255,255,0.12);
+      font-size: 14px;
+    }
+    option { color: #111; }
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+    input::placeholder, textarea::placeholder {
+      color: rgba(255,255,255,0.7);
+    }
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .item {
+      border-radius: 18px;
+      padding: 13px 14px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .item-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.5;
+    }
+    .item-meta {
+      margin-top: 4px;
+      font-size: 12px;
+      opacity: .76;
+      line-height: 1.5;
+    }
+    .mini-actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    .mini-btn {
+      padding: 8px 10px;
+      border-radius: 14px;
+      font-size: 12px;
+    }
+    .menu-layout {
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      gap: 16px;
+    }
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .chip {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.10);
+      border: 1px solid rgba(255,255,255,0.10);
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .chip.active { background: rgba(255,255,255,0.26); }
+    .dish-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+    }
+    .dish {
+      border-radius: 20px;
+      padding: 14px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.10);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .dish-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .dish-meta {
+      font-size: 13px;
+      line-height: 1.65;
+      opacity: .84;
+    }
+    .dish-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+    }
+    .empty {
+      padding: 14px;
+      border-radius: 16px;
+      background: rgba(255,255,255,0.07);
+      font-size: 14px;
+      opacity: 0.82;
+      line-height: 1.7;
+    }
+    @media (max-width: 900px) {
+      .grid, .menu-layout { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      body { padding: 10px; }
+      .hero { padding: 18px; }
+      .hero h1 { font-size: 28px; }
+      .row2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero glass">
+      <div>
+        <h1>家庭备忘与点菜页面</h1>
+        <p>这个页面是独立的单独页面，包含备忘事项、置顶纪念日、家庭点菜和添加菜品。所有数据自动保存到浏览器本地 localStorage，适合直接挂到 GitHub Pages。</p>
+      </div>
+      <a class="btn" href="index.html">返回首页</a>
+    </section>
+
+    <section class="grid">
+      <div class="panel glass">
+        <div>
+          <div class="title">备忘事项</div>
+          <div class="sub">记录提醒、采购清单、当天待办。</div>
+        </div>
+        <div class="stack">
+          <input id="memoInput" placeholder="例如：周日买花材 / 晚上 7 点做饭" />
+          <button id="addMemoBtn">添加备忘</button>
+        </div>
+        <div id="memoList" class="list"></div>
+      </div>
+
+      <div class="panel glass">
+        <div>
+          <div class="title">置顶纪念日</div>
+          <div class="sub">记录生日、周年、节日计划。</div>
+        </div>
+        <div class="row2">
+          <input id="annTitleInput" placeholder="纪念日名称" />
+          <input id="annDateInput" type="date" />
+        </div>
+        <button id="addAnnBtn">添加纪念日</button>
+        <div id="annList" class="list"></div>
+      </div>
+
+      <div class="panel glass full">
+        <div>
+          <div class="title">家庭点菜</div>
+          <div class="sub">左边添加菜品，右边按分类查看并快速点菜。</div>
+        </div>
+        <div class="menu-layout">
+          <div class="panel glass" style="padding:16px; margin:0;">
+            <div>
+              <div class="title" style="font-size:18px;">添加菜品</div>
+              <div class="sub">可以继续扩展图片、价格、负责人。</div>
+            </div>
+            <div class="stack">
+              <input id="dishNameInput" placeholder="菜品名称，例如：番茄牛腩" />
+              <select id="dishCategoryInput">
+                <option value="家常菜">家常菜</option>
+                <option value="凉菜">凉菜</option>
+                <option value="汤类">汤类</option>
+                <option value="素菜">素菜</option>
+                <option value="荤菜">荤菜</option>
+                <option value="主食">主食</option>
+                <option value="甜品">甜品</option>
+              </select>
+              <textarea id="dishNoteInput" placeholder="备注：口味、做法、谁爱吃、需要提前准备什么"></textarea>
+              <button id="addDishBtn">添加菜品</button>
+            </div>
+          </div>
+
+          <div>
+            <div id="categoryFilter" class="filters"></div>
+            <div style="height:12px;"></div>
+            <div id="dishGrid" class="dish-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel glass full">
+        <div>
+          <div class="title">今日点菜记录</div>
+          <div class="sub">记录谁点了什么，按早餐 / 午餐 / 晚餐快速留档。</div>
+        </div>
+        <div id="orderList" class="list"></div>
+      </div>
+    </section>
+  </div>
+
+<script>
+  var STORAGE_KEY = "family_dashboard_data_v1";
+  var data = {
+    memos: [
+      { id: Date.now() + 1, text: "周末确认花材采购清单" },
+      { id: Date.now() + 2, text: "晚餐前确认是否需要加菜" }
+    ],
+    anniversaries: [
+      { id: Date.now() + 3, title: "家庭纪念日", date: "2026-12-20" }
+    ],
+    dishes: [
+      { id: Date.now() + 4, name: "番茄牛腩", category: "荤菜", note: "适合晚餐，提前炖更入味" },
+      { id: Date.now() + 5, name: "蒜蓉西兰花", category: "素菜", note: "清爽搭配" },
+      { id: Date.now() + 6, name: "紫菜蛋花汤", category: "汤类", note: "快手汤品" }
+    ],
+    orders: []
+  };
+
+  function loadData() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) data = JSON.parse(raw);
+    } catch (err) {
+      console.warn("读取本地数据失败", err);
+    }
+  }
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+  loadData();
+
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  function escapeForJs(str) {
+    return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+  }
+
+  var memoInput = document.getElementById("memoInput");
+  var memoList = document.getElementById("memoList");
+  document.getElementById("addMemoBtn").addEventListener("click", function () {
+    var text = memoInput.value.trim();
+    if (!text) return;
+    data.memos.unshift({ id: Date.now(), text: text });
+    memoInput.value = "";
+    saveData();
+    renderMemos();
+  });
+  function renderMemos() {
+    if (!data.memos.length) {
+      memoList.innerHTML = '<div class="empty">还没有备忘事项，先添加一条吧。</div>';
+      return;
+    }
+    memoList.innerHTML = data.memos.map(function (item) {
+      return '<div class="item"><div><div class="item-title">' + escapeHtml(item.text) + '</div></div><div class="mini-actions"><button class="mini-btn" onclick="deleteMemo(' + item.id + ')">删除</button></div></div>';
+    }).join('');
+  }
+  function deleteMemo(id) {
+    data.memos = data.memos.filter(function (item) { return item.id !== id; });
+    saveData();
+    renderMemos();
+  }
+  window.deleteMemo = deleteMemo;
+
+  var annTitleInput = document.getElementById("annTitleInput");
+  var annDateInput = document.getElementById("annDateInput");
+  var annList = document.getElementById("annList");
+  document.getElementById("addAnnBtn").addEventListener("click", function () {
+    var title = annTitleInput.value.trim();
+    var date = annDateInput.value;
+    if (!title || !date) return;
+    data.anniversaries.unshift({ id: Date.now(), title: title, date: date });
+    annTitleInput.value = "";
+    annDateInput.value = "";
+    saveData();
+    renderAnniversaries();
+  });
+  function daysUntil(dateStr) {
+    var today = new Date();
+    var target = new Date(dateStr + 'T00:00:00');
+    var yearTarget = new Date(today.getFullYear(), target.getMonth(), target.getDate());
+    if (yearTarget < new Date(today.getFullYear(), today.getMonth(), today.getDate())) {
+      yearTarget = new Date(today.getFullYear() + 1, target.getMonth(), target.getDate());
+    }
+    return Math.round((yearTarget - new Date(today.getFullYear(), today.getMonth(), today.getDate())) / 86400000);
+  }
+  function renderAnniversaries() {
+    if (!data.anniversaries.length) {
+      annList.innerHTML = '<div class="empty">还没有置顶纪念日，添加生日或周年吧。</div>';
+      return;
+    }
+    var sorted = data.anniversaries.slice().sort(function (a, b) {
+      return daysUntil(a.date) - daysUntil(b.date);
+    });
+    annList.innerHTML = sorted.map(function (item) {
+      return '<div class="item"><div><div class="item-title">' + escapeHtml(item.title) + '</div><div class="item-meta">日期：' + item.date + ' · 还有 ' + daysUntil(item.date) + ' 天</div></div><div class="mini-actions"><button class="mini-btn" onclick="deleteAnn(' + item.id + ')">删除</button></div></div>';
+    }).join('');
+  }
+  function deleteAnn(id) {
+    data.anniversaries = data.anniversaries.filter(function (item) { return item.id !== id; });
+    saveData();
+    renderAnniversaries();
+  }
+  window.deleteAnn = deleteAnn;
+
+  var dishNameInput = document.getElementById("dishNameInput");
+  var dishCategoryInput = document.getElementById("dishCategoryInput");
+  var dishNoteInput = document.getElementById("dishNoteInput");
+  var dishGrid = document.getElementById("dishGrid");
+  var categoryFilter = document.getElementById("categoryFilter");
+  var orderList = document.getElementById("orderList");
+  var activeCategory = "全部";
+
+  document.getElementById("addDishBtn").addEventListener("click", function () {
+    var name = dishNameInput.value.trim();
+    var category = dishCategoryInput.value;
+    var note = dishNoteInput.value.trim();
+    if (!name) return;
+    data.dishes.unshift({ id: Date.now(), name: name, category: category, note: note });
+    dishNameInput.value = "";
+    dishNoteInput.value = "";
+    saveData();
+    renderFilters();
+    renderDishes();
+  });
+
+  function renderFilters() {
+    var categories = ["全部"].concat(Array.from(new Set(data.dishes.map(function (d) { return d.category; }))));
+    categoryFilter.innerHTML = categories.map(function (cat) {
+      return '<button class="chip ' + (cat === activeCategory ? 'active' : '') + '" onclick="setCategoryFilter(\'' + escapeForJs(cat) + '\')">' + escapeHtml(cat) + '</button>';
+    }).join('');
+  }
+  function setCategoryFilter(cat) {
+    activeCategory = cat;
+    renderFilters();
+    renderDishes();
+  }
+  window.setCategoryFilter = setCategoryFilter;
+
+  function renderDishes() {
+    var list = activeCategory === "全部" ? data.dishes : data.dishes.filter(function (dish) { return dish.category === activeCategory; });
+    if (!list.length) {
+      dishGrid.innerHTML = '<div class="empty">这个分类下还没有菜品。</div>';
+      return;
+    }
+    dishGrid.innerHTML = list.map(function (dish) {
+      return '<div class="dish"><div class="dish-name">' + escapeHtml(dish.name) + '</div><div class="dish-meta">分类：' + escapeHtml(dish.category) + '<br>' + (dish.note ? escapeHtml(dish.note) : '暂无备注') + '</div><div class="dish-actions"><button class="mini-btn" onclick="quickOrder(' + dish.id + ', \'早餐\')">早餐</button><button class="mini-btn" onclick="quickOrder(' + dish.id + ', \'午餐\')">午餐</button><button class="mini-btn" onclick="quickOrder(' + dish.id + ', \'晚餐\')">晚餐</button><button class="mini-btn" onclick="deleteDish(' + dish.id + ')">删除</button></div></div>';
+    }).join('');
+  }
+
+  function quickOrder(dishId, meal) {
+    var dish = data.dishes.find(function (d) { return d.id === dishId; });
+    if (!dish) return;
+    var person = prompt("谁点的这道菜？", "家人");
+    if (!person) return;
+    data.orders.unshift({
+      id: Date.now(),
+      person: person,
+      meal: meal,
+      dishName: dish.name,
+      date: new Date().toLocaleDateString('zh-CN')
+    });
+    saveData();
+    renderOrders();
+  }
+  window.quickOrder = quickOrder;
+
+  function deleteDish(id) {
+    data.dishes = data.dishes.filter(function (dish) { return dish.id !== id; });
+    saveData();
+    renderFilters();
+    renderDishes();
+  }
+  window.deleteDish = deleteDish;
+
+  function renderOrders() {
+    if (!data.orders.length) {
+      orderList.innerHTML = '<div class="empty">还没有点菜记录，点一份试试吧。</div>';
+      return;
+    }
+    orderList.innerHTML = data.orders.map(function (order) {
+      return '<div class="item"><div><div class="item-title">' + escapeHtml(order.person) + ' 点了「' + escapeHtml(order.dishName) + '」</div><div class="item-meta">' + escapeHtml(order.date) + ' · ' + escapeHtml(order.meal) + '</div></div><div class="mini-actions"><button class="mini-btn" onclick="deleteOrder(' + order.id + ')">删除</button></div></div>';
+    }).join('');
+  }
+  function deleteOrder(id) {
+    data.orders = data.orders.filter(function (order) { return order.id !== id; });
+    saveData();
+    renderOrders();
+  }
+  window.deleteOrder = deleteOrder;
+
+  renderMemos();
+  renderAnniversaries();
+  renderFilters();
+  renderDishes();
+  renderOrders();
+</script>
+</body>
+</html>
